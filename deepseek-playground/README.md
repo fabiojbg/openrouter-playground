@@ -1,6 +1,6 @@
 # DeepSeek Playground
 
-Just got your DeepSeek API Key and want to give it a spin? Look not further! This project is mainly targeted to allow you to test out your Open AI API keys. The current DeepSeek Playground allows 8192 tokens for 64k models like DeepSeekChat. This project should fix both of those issues without comprimising on either experience. The project aims to preserve as much of the vanilla experience as possible while also providing a link between the the playground and DeepSeekGPT to enable a better developer experience.
+Just got your DeepSeek API Key and want to give it a spin? Look not further! This project is mainly targeted to allow you to test out your Open AI API keys. The current DeepSeek Playground supports the DeepSeek V3 and the new reasoning model DeepSeek-R1 (without showing the thinking process). The project aims to preserve as much of the vanilla experience as possible while also providing a link between the the playground and DeepSeek to enable a better developer experience.
 
 As a side note, all API keys are encrypted and stored in your browser's local storage, so you can use this project without having to worry about your API key being stolen.
 
