@@ -4,12 +4,32 @@ export const OpenAIChatModels: Record<string, OpenAIModel> = {
   "gpt-4o": {
     id: "gpt-4o",
     name: "GPT-4 Omni",
-    maxLimit: 8192,
+    maxLimit: 16384,
   },
   "gpt-4": {
     id: "gpt-4",
     name: "GPT-4",
     maxLimit: 8192,
+  },
+  "o1-mini": {
+    id: "o1-mini",
+    name: "O1 Mini",
+    maxLimit: 65536,
+  },
+  "o1-preview": {
+    id: "o1-preview",
+    name: "O1 Preview",
+    maxLimit: 32768,
+  },
+  "o1": {
+    id: "o1",
+    name: "O1",
+    maxLimit: 100000,
+  },
+  "gpt-4o-mini": {
+    id: "gpt-4o-mini",
+    name: "GPT-4 Omni Mini",
+    maxLimit: 16384,
   },
   "gpt-4-0125-preview": {
     id: "gpt-4-0125-preview",
