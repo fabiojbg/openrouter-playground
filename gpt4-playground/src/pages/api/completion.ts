@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { defaultConfig, getOpenAICompletion } from "@/utils/OpenAI";
-import { OpenAIRequest } from "@/utils/OpenAI";
+import { OpenAIRequest, OpenAIChatMessage } from "@/utils/OpenAI";
 
 export const config = {
   runtime: "edge",
@@ -45,10 +45,30 @@ export default async function handler(
     n: 1,
   };
 
-  const payload: OpenAIRequest = {
-    ...config,
-    messages,
-  };
+  // Handle reasoning models (o1 series)
+  const isReasoningModel = model.startsWith('o1');
+  
+  // Convert system messages to assistant role for reasoning models
+  const processedMessages = isReasoningModel 
+    ? messages.map((m: OpenAIChatMessage) => ({
+        ...m,
+        role: m.role === 'system' ? 'assistant' : m.role
+      }))
+    : messages;
+
+  // Omit unsupported parameters for reasoning models
+  const payload: OpenAIRequest = isReasoningModel
+    ? {
+        model,
+        messages: processedMessages,
+        max_completion_tokens: config.max_tokens,
+        stream: true,
+        n: 1
+      }
+    : {
+        ...config,
+        messages: processedMessages
+      };
 
   try {
     const stream = await getOpenAICompletion(token, payload);
