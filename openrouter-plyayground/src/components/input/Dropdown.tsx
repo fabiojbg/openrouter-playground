@@ -1,5 +1,5 @@
 import { useOpenAI } from "@/context/OpenAIProvider";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { MdExpandMore } from "react-icons/md";
 
 type Props = {
@@ -19,6 +19,13 @@ export default function Dropdown({
 }: Props) {
   const [show, setShow] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (show) {
+      searchInputRef.current?.focus();
+    }
+  }, [show]);
 
   const handleSelect = (option: string) => {
     onSelect(option);
@@ -48,6 +55,7 @@ export default function Dropdown({
             </span>
           )}
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Search..."
             className="px-4 py-2 border border-gray-300 rounded mb-2 text-black"
