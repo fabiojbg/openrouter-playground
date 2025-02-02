@@ -48,8 +48,8 @@ export default function ChatSidebar({}: Props) {
         </div>
 
         <Github />
-        <span className="text-center text-primary/80">
-          Made by Nashex and Customized by Fabio Botelho
+        <span className="text-center text-primary/80 text-sm mt-2">
+          Customized by Fabio Botelho
         </span>
       </div>
     </div>
