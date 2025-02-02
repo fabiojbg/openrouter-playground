@@ -69,7 +69,7 @@ export const getOpenAICompletion = async (
 
           try {
             const json = JSON.parse(data) as StreamResponse;
-            const text = json.choices[0]?.delta?.content || "";
+const text = json.choices && json.choices.length > 0 ? json.choices[0]?.delta?.content || "" : "";
             
             if (text) {
               const queue = encoder.encode(text);
