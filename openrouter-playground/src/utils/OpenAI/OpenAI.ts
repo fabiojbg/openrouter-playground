@@ -99,9 +99,7 @@ const text = json.choices && json.choices.length > 0 ? json.choices[0]?.delta?.c
       } catch (e) {
         console.error("Error reading stream:", e);
         controller.error(e);
-      } finally {
-        controller.close();
-      }
+          }
     },
   });
 
