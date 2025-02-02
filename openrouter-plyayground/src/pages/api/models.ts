@@ -11,8 +11,8 @@ export default async function handler(
     return res.status(401).json({ error: "Missing token" });
   }
 
-  const openAi = new OpenAI({
-    apiKey,
+  const openAi = new OpenAI({ baseURL: "https://openrouter.ai/api/v1",
+    apiKey: apiKey, 
   })
 
   try {

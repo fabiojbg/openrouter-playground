@@ -31,4 +31,7 @@ export interface OpenAIModel {
   id: string;
   name: string;
   maxLimit: number;
+  inputFee: number;
+  outputFee: number;
+  context: number;
 }
