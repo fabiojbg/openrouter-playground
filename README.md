@@ -1,6 +1,6 @@
 # GPTs Playground
 
-This repository have a bunch of GPTs based on the repository https://github.com/Nashex/gpt4-playground with some improvements like button to copy codes some.
+This repository have a bunch of GPTs based on the repository https://github.com/Nashex/gpt4-playground with some improvements like button to copy source codes.
 
 ## Demo
 
