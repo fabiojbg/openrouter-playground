@@ -15,13 +15,13 @@ export default function PlaygroundMessages({}: Props) {
   const [scrolling, setScrolling] = React.useState(false);
 
   useEffect(() => {
-    if (messages.length != prevMessageLength) {
+    if (messages.length !== prevMessageLength) {
       setPrevMessageLength(messages.length);
     }
 
     if (
-        messageContainer.current &&
-        (!scrolling || messages.length != prevMessageLength)
+      messageContainer.current &&
+      (!scrolling || messages.length !== prevMessageLength)
     ) {
       messageContainer.current.scrollTop = messageContainer.current.scrollHeight;
     }
@@ -30,8 +30,10 @@ export default function PlaygroundMessages({}: Props) {
   // Command Enter to submit
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && e.metaKey) {
-        submit();
+      const target = e.target as HTMLElement;
+      if (e.key === "Enter" && target.tagName === "TEXTAREA") {
+        console.log("Enter key pressed. Submitting message...");
+        submit(); // Call submit directly on Enter key
       }
     };
 
@@ -42,13 +44,13 @@ export default function PlaygroundMessages({}: Props) {
     };
   }, [submit]);
 
-// Scroll handling for auto scroll
+  // Scroll handling for auto scroll
   useEffect(() => {
     const handleScroll = () => {
       if (messageContainer.current) {
         if (
-            messageContainer.current.scrollTop <
-            messageContainer.current.scrollHeight -
+          messageContainer.current.scrollTop <
+          messageContainer.current.scrollHeight -
             messageContainer.current.offsetHeight
         ) {
           setScrolling(true);

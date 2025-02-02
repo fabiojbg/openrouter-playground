@@ -1,6 +1,6 @@
-# GPT-4 Playground
+# OpenRouter Playground
 
-Just got your GPT-4 API Key and want to give it a spin? Look not further! This project is mainly targeted to allow you to test out your Open AI API keys. The current OpenAI Playground supports the new reasoning o1 models (without showing their thinking process). This project should fix both of those issues without comprimising on either experience. The project aims to preserve as much of the vanilla experience as possible while also providing a link between the the playground and ChatGPT to enable a better developer experience.
+Just got your OpenRouter API Key and want to give it a spin? Look not further! This project is mainly targeted to allow you to test out your OpenRouter API keys. The current OpenRouter Playground supports the new reasoning o1 models (without showing their thinking process). This project should fix both of those issues without comprimising on either experience. The project aims to preserve as much of the vanilla experience as possible while also providing a link between the the playground and ChatGPT to enable a better developer experience.
 
 As a side note, all API keys are encrypted and stored in your browser's local storage, so you can use this project without having to worry about your API key being stolen.
 

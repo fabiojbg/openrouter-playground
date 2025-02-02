@@ -32,8 +32,10 @@ export default async function handler(
       chatModels,
     });
   } catch (e: any) {
-    if (e.response) {
+    if (e.response && e.response.data) {
       return res.status(e.response.status).json({ error: e.response.data });
+    } else {
+      return res.status(500).json({ error: "An unexpected error occurred." });
     }
 
     return res.status(500).json({ error: e.message });

@@ -62,7 +62,7 @@ export default function AddTokenModal({ className }: Props) {
                 rel="noreferrer"
                 className="text-primary hover:underline"
               >
-                OpenAI dashboard
+                OpenRouter dashboard
               </a>
               . All requests are made on the client side, so your token is never
               sent to the server. If you would like more information look at the{" "}

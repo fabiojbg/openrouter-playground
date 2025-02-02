@@ -139,7 +139,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         ...newConfig,
       };
     });
-
   };
 
   const updateMessageContent = (id: number, content: string) => {
@@ -235,85 +234,85 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     updateConversation(id, { name });
   };
 
-  const submit = useCallback(
-    async (messages_: OpenAIChatMessage[] = []) => {
-      if (loading) return;
-      setLoading(true);
+  const submit = useCallback(async (messages_: OpenAIChatMessage[] = []) => {
+    console.log("Submit function called. Loading state:", loading);
+    if (loading) return;
+    setLoading(true);
 
+    try {
+      const decoder = new TextDecoder();
       messages_ = messages_.length ? messages_ : messages;
 
-      try {
-        const decoder = new TextDecoder();
-        const { body, ok } = await fetch("/api/completion", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...config,
-            messages: [systemMessage, ...messages_].map(
-              ({ role, content }) => ({
-                role,
-                content,
-              })
-            ),
-          }),
-        });
+      const payload = {
+        ...config,
+        messages: [systemMessage, ...messages_].map(({ role, content }) => ({
+          role,
+          content,
+        })),
+      };
+      console.log("Sending request to API with payload:", payload);
 
-        if (!body) return;
-        const reader = body.getReader();
+      const response = await fetch("/api/completion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-        if (!ok) {
-          // Get the error message from the response body
-          const { value } = await reader.read();
-          const chunkValue = decoder.decode(value);
-          const { error } = JSON.parse(chunkValue);
+      const { body, ok } = response;
+      console.log("API response:", response);
 
-          throw new Error(
-            error?.message ||
-              "Failed to fetch response, check your API key and try again."
-          );
-        }
-
-        let done = false;
-
-        const message = {
-          id: messages_.length,
-          role: "assistant",
-          content: "",
-        } as OpenAIChatMessage;
-
-        setMessages((prev) => {
-          message.id = prev.length;
-          return [...prev, message];
-        });
-
-        while (!done) {
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
-          const chunkValue = decoder.decode(value);
-          message.content += chunkValue;
-
-          updateMessageContent(message.id as number, message.content);
-        }
-      } catch (error: any) {
-        setMessages((prev) => {
-          return [
-            ...prev,
-            {
-              id: prev.length,
-              role: "assistant",
-              content: error.message,
-            },
-          ];
-        });
+      if (!body) {
+        throw new Error("No response body received from the API");
       }
 
+      const reader = body.getReader();
+
+      if (!ok) {
+        const { value } = await reader.read();
+        const chunkValue = decoder.decode(value);
+        const { error } = JSON.parse(chunkValue);
+        throw new Error(
+          error?.message || "Failed to fetch response, check your API key and try again."
+        );
+      }
+
+      const messageId = Date.now();
+      let accumulatedContent = "";
+      
+      setMessages((prev) => [...prev, {
+        id: messageId,
+        role: "assistant",
+        content: "",
+      } as OpenAIChatMessage]);
+
+      let done = false;
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        if (value) {
+          const chunkValue = decoder.decode(value);
+          accumulatedContent += chunkValue;
+          updateMessageContent(messageId, accumulatedContent);
+        }
+      }
+    } catch (error: any) {
+      console.error("Error in submit:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          role: "assistant",
+          content: error.message || "An error occurred while processing your request",
+        },
+      ]);
+      setError(error.message || "An error occurred while processing your request");
+    } finally {
       setLoading(false);
-    },
-    [config, messages, systemMessage, loading, token]
-  );
+    }
+  }, [config, messages, systemMessage, loading, token]);
 
   const addMessage = useCallback(
     (
@@ -322,10 +321,12 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       role: "user" | "assistant" = "user"
     ) => {
       setMessages((prev) => {
+        // Generate a unique timestamp-based ID
+        const uniqueId = Date.now() + prev.length;
         const messages = [
           ...prev,
           {
-            id: prev.length,
+            id: uniqueId,
             role,
             content: content || "",
           } as OpenAIChatMessage,
