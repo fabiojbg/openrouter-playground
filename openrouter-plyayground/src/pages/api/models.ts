@@ -25,7 +25,7 @@ export default async function handler(
     const chatModels = models
       .filter((model) => model in OpenAIChatModels)
       .map((model) => OpenAIChatModels[model as keyof typeof OpenAIChatModels])
-      .sort((a, b) => (b.maxLimit || 0) - (a.maxLimit || 0)); // Sort by max limit
+      .sort((a, b) => a.id.localeCompare(b.id)); // Sort by id
 
     return res.status(200).json({
       models,
