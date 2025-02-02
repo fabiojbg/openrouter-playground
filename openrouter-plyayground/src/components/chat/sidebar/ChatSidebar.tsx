@@ -32,17 +32,17 @@ export default function ChatSidebar({}: Props) {
           <div className="flex flex-col border-b border-white/10 gap-y-2">
             <CurrentModel />
             <div className="text-sm text-gray-300 space-y-1 px-4 pb-2">
-              <div>Context Length: {OpenAIChatModels[config?.model]?.context?.toLocaleString() || 'N/A'}</div>
+              <div>Context Length: {OpenAIChatModels[config?.model]?.context?.toLocaleString('en-US') || 'N/A'}</div>
               <div>
-                Input ($/1M tokens):{" "}
-                {OpenAIChatModels[config?.model]?.inputFee?.toLocaleString(undefined, {
+                Input ($/1M tokens):{" $ "}
+                {OpenAIChatModels[config?.model]?.inputFee?.toLocaleString('en-US', {
                   minimumFractionDigits: 3,
                   maximumFractionDigits: 3,
                 }) || '0.000'}
               </div>
               <div>
-                Output ($/1M tokens):{" "}
-                {OpenAIChatModels[config?.model]?.outputFee?.toLocaleString(undefined, {
+                Output ($/1M tokens):{" $"}
+                {OpenAIChatModels[config?.model]?.outputFee?.toLocaleString('en-US', {
                   minimumFractionDigits: 3,
                   maximumFractionDigits: 3,
                 }) || '0.000'}
