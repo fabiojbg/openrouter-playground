@@ -21,7 +21,7 @@ yarn install
 yarn dev
 ```
 
-This will start a local server on port 3000. You can then navigate to `localhost:3000` to view the project!
+This will start a local server on port 3000. You can then navigate to `localhost:3002` to view the project!
 
 ## Contributing
 
