@@ -32,6 +32,24 @@ export default function ConfigSidebar({}: Props) {
         value={config.model}
         onSelect={(option) => handleUpdateConfig("model", option)}
       />
+      <div className="text-sm text-gray-600 space-y-1 mt-1">
+<div>Context Length: {OpenAIChatModels[config.model]?.context?.toLocaleString('en-US', { useGrouping: true }) || 'N/A'}</div>
+        <div>
+          Input ($/1M tokens):{" $ "}
+          {OpenAIChatModels[config.model]?.inputFee?.toLocaleString('en-US', {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3,
+          }) || '0.000'}
+        </div>
+        <div>
+          Output ($/1M tokens):{" $ "}
+          {OpenAIChatModels[config.model]?.outputFee?.toLocaleString('en-US', {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3,
+          }) || '0.000'}
+        </div>
+      </div>
+
       <Slider
         label="temperature"
         range={[0, 1]}

@@ -18,6 +18,15 @@ export type OpenAIRequest = {
   messages: OpenAIChatMessage[];
 } & OpenAIConfig;
 
+interface StreamResponse {
+  choices: Array<{
+    delta: {
+      content?: string;
+    };
+    finish_reason?: string;
+  }>;
+}
+
 export const getOpenAICompletion = async (
   token: string,
   payload: OpenAIRequest
@@ -35,41 +44,53 @@ const response = await fetch("https://api.deepseek.com/chat/completions", {
     body: JSON.stringify(payload),
   });
 
-  // Check for errors
   if (!response.ok) {
     throw new Error(await response.text());
   }
 
-  let counter = 0;
   const stream = new ReadableStream({
     async start(controller) {
       function onParse(event: ParsedEvent | ReconnectInterval) {
         if (event.type === "event") {
           const data = event.data;
-          // https://beta.openai.com/docs/api-reference/completions/create#completions/create-stream
+          
           if (data === "[DONE]") {
             controller.close();
             return;
           }
 
           try {
-            const json = JSON.parse(data);
-            const text = json.choices[0].delta?.content || "";
-            if (counter < 2 && (text.match(/\n/) || []).length) {
-              return;
-            }
+            const json = JSON.parse(data) as StreamResponse;
+const text = json.choices && json.choices.length > 0 ? json.choices[0]?.delta?.content || "" : "";
+            
+            if (text) {
             const queue = encoder.encode(text);
             controller.enqueue(queue);
-            counter++;
+            }
+
+            // Check if the response is complete
+            if (json.choices[0]?.finish_reason === "stop") {
+              controller.close();
+            }
           } catch (e) {
+            console.error("Error parsing stream:", e);
             controller.error(e);
           }
         }
       }
 
       const parser = createParser(onParse);
-      for await (const chunk of response.body as any) {
-        parser.feed(decoder.decode(chunk));
+      try {
+        // We've already checked response.body is not null above
+        const reader = (response.body as ReadableStream).getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          parser.feed(decoder.decode(value));
+        }
+      } catch (e) {
+        console.error("Error reading stream:", e);
+        controller.error(e);
       }
     },
   });

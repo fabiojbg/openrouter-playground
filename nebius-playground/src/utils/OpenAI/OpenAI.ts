@@ -46,14 +46,7 @@ export const getOpenAICompletion = async (
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    const error = new Error(errorText);
-    (error as any).status = response.status;
-    throw error;
-  }
-
-  if (!response.body) {
-    throw new Error("No response body received");
+    throw new Error(await response.text());
   }
 
   const stream = new ReadableStream({

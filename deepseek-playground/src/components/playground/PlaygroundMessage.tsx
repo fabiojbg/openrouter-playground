@@ -18,6 +18,15 @@ export default function PlaygroundMessage({
   const { updateMessageContent, removeMessage, toggleMessageRole } =
     useOpenAI();
 
+  const { submit } = useOpenAI(); // Add this line to get the submit function
+
+const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  if (e.key === "Enter") {
+    e.preventDefault(); // Prevent default behavior (new line)
+    // Removed submit call since it's handled in PlaygroundMessages
+  }
+};
+
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (e.target.value === content || id === undefined) return;
 

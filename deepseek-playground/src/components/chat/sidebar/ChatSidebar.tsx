@@ -2,6 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { MdAdd, MdDeleteOutline, MdBuild } from "react-icons/md";
 import { useOpenAI } from "@/context/OpenAIProvider";
+import { OpenAIChatModels } from "@/utils/OpenAI";
 import Github from "../../misc/Github";
 import ThemeButton from "./buttons/ThemeButton";
 import ButtonContainer from "./buttons/ButtonContainer";
@@ -12,10 +13,10 @@ import CurrentModel from './buttons/CurrentModel';
 type Props = {};
 
 export default function ChatSidebar({}: Props) {
-  const { clearConversations } = useOpenAI();
+  const { clearConversations, config } = useOpenAI();
 
   return (
-    <div className="dark left-0 top-0 h-full max-h-screen flex-col bg-gray-900 text-primary md:fixed md:flex md:w-[260px]">
+    <div className="dark left-0 top-0 h-full max-h-screen flex-col bg-gray-900 text-primary md:fixed md:flex md:w-[290px]">
       <div className="flex h-full flex-col items-stretch p-2">
         <Link
           href="/"
@@ -30,6 +31,23 @@ export default function ChatSidebar({}: Props) {
         <div className="flex flex-col gap-y-2 border-y border-white/10 py-2">
           <div className="flex flex-col border-b border-white/10 gap-y-2">
             <CurrentModel />
+            <div className="text-sm text-gray-300 space-y-1 px-4 pb-2">
+              <div>Context Length: {OpenAIChatModels[config?.model]?.context?.toLocaleString('en-US') || 'N/A'}</div>
+              <div>
+                Input ($/1M tokens):{" $ "}
+                {OpenAIChatModels[config?.model]?.inputFee?.toLocaleString('en-US', {
+                  minimumFractionDigits: 3,
+                  maximumFractionDigits: 3,
+                }) || '0.000'}
+              </div>
+              <div>
+                Output ($/1M tokens):{" $"}
+                {OpenAIChatModels[config?.model]?.outputFee?.toLocaleString('en-US', {
+                  minimumFractionDigits: 3,
+                  maximumFractionDigits: 3,
+                }) || '0.000'}
+              </div>
+            </div>
             <ApiKey />
           </div>
           <Link
@@ -48,8 +66,8 @@ export default function ChatSidebar({}: Props) {
         </div>
 
         <Github />
-        <span className="text-center text-primary/80">
-          Made by Nashex and Customized by Fabio Botelho
+        <span className="text-center text-primary/80 text-sm mt-2">
+          Customized by Fabio Botelho
         </span>
       </div>
     </div>
