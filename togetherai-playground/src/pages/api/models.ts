@@ -1,6 +1,39 @@
-import { OpenAIChatModels } from "@/utils/OpenAI";
 import type { NextApiRequest, NextApiResponse } from "next";
-import OpenAI from "openai";
+
+interface TogetherAIModel {
+  id: string;
+  object: string;
+  created: number;
+  type: string;
+  running: boolean;
+  display_name: string;
+  organization: string;
+  link: string;
+  license: string;
+  context_length?: number;
+  config: {
+    chat_template: string | null;
+    stop: string[];
+    bos_token: string | null;
+    eos_token: string | null;
+  };
+  pricing: {
+    hourly: number;
+    input: number;
+    output: number;
+    base: number;
+    finetune: number;
+  };
+}
+
+interface OpenAIModel { // Keep OpenAIModel interface as it's used in OpenAI.constants.ts
+  id: string;
+  name: string;
+  inputFee: number;
+  outputFee: number;
+  context: number;
+  maxLimit: number;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,33 +44,36 @@ export default async function handler(
     return res.status(401).json({ error: "Missing token" });
   }
 
-  const openAi = new OpenAI({ baseURL: "https://api.together.xyz/v1",
-    apiKey: apiKey, 
-  })
-
   try {
-    const { data } = await openAi.models.list();
-
-    // Get the list of models
-    const models = data.map(({ id }) => id);
-
-    // Get the models that can interface with the chat API and return
-    const chatModels = models
-      .filter((model) => model in OpenAIChatModels)
-      .map((model) => OpenAIChatModels[model as keyof typeof OpenAIChatModels])
-      .sort((a, b) => a.id.localeCompare(b.id)); // Sort by id
-
-    return res.status(200).json({
-      models,
-      chatModels,
+    const response = await fetch("https://api.together.xyz/v1/models", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
     });
-  } catch (e: any) {
-    if (e.response && e.response.data) {
-      return res.status(e.response.status).json({ error: e.response.data });
-    } else {
-      return res.status(500).json({ error: "An unexpected error occurred." });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return res.status(response.status).json({ error: errorData });
     }
 
-    return res.status(500).json({ error: e.message });
+    const data: TogetherAIModel[] = await response.json();
+    const togetherAiModels: OpenAIModel[] = data // Rename chatModels to togetherAiModels
+      .map((model) => ({
+        id: model.id,
+        name: model.display_name,
+        inputFee: model.pricing.input,
+        outputFee: model.pricing.output,
+        context: model.context_length || 4096, // Default context length
+        maxLimit: model.context_length || 4096, // Default max limit
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id));
+
+    return res.status(200).json({
+      models: data.map(model => model.id), // Keep returning all model ids for now
+      togetherAiModels, // Return all transformed models
+    });
+  } catch (e: any) {
+    console.error(e);
+    return res.status(500).json({ error: "An unexpected error occurred." });
   }
 }

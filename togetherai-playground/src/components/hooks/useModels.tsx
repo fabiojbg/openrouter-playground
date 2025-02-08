@@ -1,4 +1,5 @@
-import { OpenAIChatModels, OpenAIModel } from "@/utils/OpenAI";
+import { OpenAIModel } from "@/utils/OpenAI/OpenAI.types"; // Correct import path for OpenAIModel
+import { OpenAIChatModels, modelsLoaded } from "@/utils/OpenAI/OpenAI.constants"; // Correct import path for OpenAIChatModels and modelsLoaded
 import React from "react";
 import { useAuth } from "@/context/AuthProvider";
 
@@ -11,14 +12,16 @@ export default function useModels() {
   const [loadingModels, setLoadingModels] = React.useState(false);
 
   React.useEffect(() => {
-    if (!token) {
-      setModels(Object.values(OpenAIChatModels));
-      return;
-    }
-
     const fetchModels = async () => {
       setLoadingModels(true);
-      const models = await fetch("/api/models", {
+      if (!token) {
+        await modelsLoaded; // Wait for models to load
+        setModels(Object.values(OpenAIChatModels));
+        setLoadingModels(false);
+        return;
+      }
+
+      const fetchedModels = await fetch("/api/models", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -26,9 +29,9 @@ export default function useModels() {
         },
       })
         .then((res) => res.json())
-        .then((res) => res.chatModels);
+        .then((res) => res.togetherAiModels); // Use togetherAiModels from API response
 
-      setModels(models || []);
+      setModels(fetchedModels || []);
       setLoadingModels(false);
     };
 
