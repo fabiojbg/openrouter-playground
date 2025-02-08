@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MdAdd, MdDeleteOutline, MdBuild } from "react-icons/md";
 import { useOpenAI } from "@/context/OpenAIProvider";
 import { OpenAIChatModels } from "@/utils/OpenAI";
@@ -14,6 +14,8 @@ type Props = {};
 
 export default function ChatSidebar({}: Props) {
   const { clearConversations, config } = useOpenAI();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   return (
     <div className="dark left-0 top-0 h-full max-h-screen flex-col bg-gray-900 text-primary md:fixed md:flex md:w-[332px]">
@@ -32,20 +34,20 @@ export default function ChatSidebar({}: Props) {
           <div className="flex flex-col border-b border-white/10 gap-y-2">
             <CurrentModel />
             <div className="text-sm text-gray-300 space-y-1 px-4 pb-2">
-              <div>Context Length: {OpenAIChatModels[config?.model]?.context?.toLocaleString('en-US') || 'N/A'}</div>
+              <div>Context Length: {mounted ? OpenAIChatModels[config?.model]?.context?.toLocaleString('en-US') : 'N/A'}</div>
               <div>
                 Input ($/1M tokens):{" $ "}
-                {OpenAIChatModels[config?.model]?.inputFee?.toLocaleString('en-US', {
+                {mounted ? OpenAIChatModels[config?.model]?.inputFee?.toLocaleString('en-US', {
                   minimumFractionDigits: 3,
                   maximumFractionDigits: 3,
-                }) || '0.000'}
+                }) : '0.000'}
               </div>
               <div>
                 Output ($/1M tokens):{" $"}
-                {OpenAIChatModels[config?.model]?.outputFee?.toLocaleString('en-US', {
+                {mounted ? OpenAIChatModels[config?.model]?.outputFee?.toLocaleString('en-US', {
                   minimumFractionDigits: 3,
                   maximumFractionDigits: 3,
-                }) || '0.000'}
+                }) : '0.000'}
               </div>
             </div>
             <ApiKey />
