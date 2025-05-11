@@ -12,11 +12,12 @@ import {
   OpenAIChatMessage,
   OpenAIConfig,
   OpenAISystemMessage,
-  OpenAIChatModels
+  OpenAIModel, // Added OpenAIModel, removed OpenAIChatModels
 } from "@/utils/OpenAI";
 import React, { PropsWithChildren, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthProvider";
+import useModels from "@/components/hooks/useModels"; // Added useModels import
 
 const CHAT_ROUTE = "/";
 
@@ -44,6 +45,8 @@ const defaultContext = {
   submit: () => {},
   loading: true,
   error: "",
+  models: [] as OpenAIModel[], // Added models
+  loadingModels: false, // Added loadingModels
 };
 
 const OpenAIContext = React.createContext<{
@@ -71,10 +74,13 @@ const OpenAIContext = React.createContext<{
   submit: () => void;
   loading: boolean;
   error: string;
+  models: OpenAIModel[]; // Added models
+  loadingModels: boolean; // Added loadingModels
 }>(defaultContext);
 
 export default function OpenAIProvider({ children }: PropsWithChildren) {
   const { token } = useAuth();
+  const { models: availableModels, loadingModels } = useModels(); // Use the hook
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -127,19 +133,53 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
   const updateConfig = (newConfig: Partial<OpenAIConfig>) => {
     setConfig((prev) => {
+      const updatedConfig = { ...prev, ...newConfig };
       // If model changes set max tokens to half of the model's max tokens
       if (newConfig.model && newConfig.model !== prev.model) {
-        newConfig.max_tokens = Math.floor(
-          OpenAIChatModels[newConfig.model].maxLimit / 2
-        );
+        const selectedModel = availableModels.find(m => m.id === newConfig.model);
+        if (selectedModel) {
+          updatedConfig.max_tokens = Math.floor(selectedModel.maxLimit / 2);
+        } else {
+          // Fallback or error if model not found
+          console.warn(`Model ${newConfig.model} not found in available models. Max tokens not updated.`);
+          // Retain previous max_tokens or set a default if necessary
+          // updatedConfig.max_tokens = prev.max_tokens; // Or some other default
+        }
       }
-
-      return {
-        ...prev,
-        ...newConfig,
-      };
+      return updatedConfig;
     });
   };
+
+  // Ensure default config model is updated if availableModels changes and defaultConfig.model is not in it
+  // Or if the current config.model is no longer in availableModels
+  useEffect(() => {
+    if (availableModels.length > 0 && !loadingModels) {
+      const currentModelExists = availableModels.some(m => m.id === config.model);
+      if (!currentModelExists) {
+        // If current model doesn't exist (e.g. after API key change, or initial load)
+        // set to the first available model or a preferred default if any
+        const newDefaultModel = availableModels.find(m => m.id === defaultConfig.model) || availableModels[0];
+        if (newDefaultModel) {
+          setConfig(prev => ({
+            ...prev,
+            model: newDefaultModel.id,
+            max_tokens: Math.floor(newDefaultModel.maxLimit / 2),
+          }));
+        }
+      } else {
+        // If current model exists, ensure its max_tokens is correctly set based on its current maxLimit
+        // This handles cases where model details might update or were not set initially
+        const currentModelDetails = availableModels.find(m => m.id === config.model);
+        if (currentModelDetails && (!config.max_tokens || config.max_tokens !== Math.floor(currentModelDetails.maxLimit / 2)) ) {
+           setConfig(prev => ({
+            ...prev,
+            max_tokens: Math.floor(currentModelDetails.maxLimit / 2),
+          }));
+        }
+      }
+    }
+  }, [availableModels, config.model, loadingModels, config.max_tokens]); // Added config.max_tokens to dependencies
+
 
   const updateMessageContent = (id: number, content: string) => {
     setMessages((prev) => {
@@ -360,6 +400,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       updateConfig,
       submit,
       error,
+      models: availableModels, // Added models
+      loadingModels, // Added loadingModels
     }),
     [
       systemMessage,
@@ -372,6 +414,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       conversations,
       clearConversations,
       error,
+      availableModels, // Added to dependency array
+      loadingModels, // Added to dependency array
     ]
   );
 

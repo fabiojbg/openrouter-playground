@@ -1,4 +1,4 @@
-import { OpenAIChatMessage, OpenAIConfig } from "./OpenAI.types";
+import { OpenAIChatMessage, OpenAIConfig, OpenAIRequest } from "./OpenAI.types"; // Added OpenAIRequest
 import {
   createParser,
   ParsedEvent,
@@ -14,9 +14,7 @@ export const defaultConfig = {
   presence_penalty: 0.6,
 };
 
-export type OpenAIRequest = {
-  messages: OpenAIChatMessage[];
-} & OpenAIConfig;
+// Removed local OpenAIRequest type definition
 
 interface StreamResponse {
   choices: Array<{

@@ -1,6 +1,4 @@
-import { OpenAIChatModels } from "./OpenAI.constants";
-
-export interface OpenAIChatMessage {
+export interface OpenAIChatMessage { // Removed import for OpenAIChatModels
   id?: number;
   role: "system" | "assistant" | "user";
   content: string;
@@ -12,7 +10,7 @@ export interface OpenAISystemMessage {
 }
 
 export interface OpenAIConfig {
-  model: keyof typeof OpenAIChatModels;
+  model: string; // Changed from keyof typeof OpenAIChatModels to string
   temperature?: number;
   max_tokens?: number;
   max_completion_tokens?: number;

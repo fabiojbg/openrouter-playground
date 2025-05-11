@@ -1,4 +1,4 @@
-import { OpenAIChatModels, OpenAIModel } from "@/utils/OpenAI";
+import { OpenAIModel } from "@/utils/OpenAI"; // Removed OpenAIChatModels
 import React from "react";
 import { useAuth } from "@/context/AuthProvider";
 
@@ -12,24 +12,36 @@ export default function useModels() {
 
   React.useEffect(() => {
     if (!token) {
-      setModels(Object.values(OpenAIChatModels));
+      setModels([]); // Set to empty array if no token
+      setLoadingModels(false); // Ensure loading is false
       return;
     }
 
     const fetchModels = async () => {
       setLoadingModels(true);
-      const models = await fetch("/api/models", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((res) => res.chatModels);
+      try {
+        const response = await fetch("/api/models", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
+        });
 
-      setModels(models || []);
-      setLoadingModels(false);
+        if (!response.ok) {
+          // Handle HTTP errors, e.g., 401 Unauthorized if token is invalid
+          console.error("Failed to fetch models:", response.status, await response.text());
+          setModels([]);
+        } else {
+          const data = await response.json();
+          setModels(data.chatModels || []);
+        }
+      } catch (error) {
+        console.error("Error fetching models:", error);
+        setModels([]); // Set to empty array on error
+      } finally {
+        setLoadingModels(false);
+      }
     };
 
     fetchModels();

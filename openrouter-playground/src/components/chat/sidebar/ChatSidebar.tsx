@@ -2,7 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { MdAdd, MdDeleteOutline, MdBuild } from "react-icons/md";
 import { useOpenAI } from "@/context/OpenAIProvider";
-import { OpenAIChatModels } from "@/utils/OpenAI";
+// Removed: import { OpenAIChatModels } from "@/utils/OpenAI";
 import Github from "../../misc/Github";
 import ThemeButton from "./buttons/ThemeButton";
 import ButtonContainer from "./buttons/ButtonContainer";
@@ -13,7 +13,20 @@ import CurrentModel from './buttons/CurrentModel';
 type Props = {};
 
 export default function ChatSidebar({}: Props) {
-  const { clearConversations, config } = useOpenAI();
+  const { clearConversations, config, models, loadingModels } = useOpenAI();
+
+  const currentModelDetails = React.useMemo(() => {
+    if (!config?.model || models.length === 0) return null;
+    return models.find(m => m.id === config.model);
+  }, [config?.model, models]);
+
+  const formatPrice = (price: number | undefined) => {
+    if (typeof price === 'undefined') return '0.00'; // Default to 2 decimal places
+    return price.toLocaleString('en-US', {
+      minimumFractionDigits: 2, // Changed to 2
+      maximumFractionDigits: 2, // Changed to 2
+    });
+  };
 
   return (
     <div className="dark left-0 top-0 h-full max-h-screen flex-col bg-gray-900 text-primary md:fixed md:flex md:w-[332px]">
@@ -32,21 +45,21 @@ export default function ChatSidebar({}: Props) {
           <div className="flex flex-col border-b border-white/10 gap-y-2">
             <CurrentModel />
             <div className="text-sm text-gray-300 space-y-1 px-4 pb-2">
-              <div>Context Length: {OpenAIChatModels[config?.model]?.context?.toLocaleString('en-US') || 'N/A'}</div>
-              <div>
-                Input ($/1M tokens):{" $ "}
-                {OpenAIChatModels[config?.model]?.inputFee?.toLocaleString('en-US', {
-                  minimumFractionDigits: 3,
-                  maximumFractionDigits: 3,
-                }) || '0.000'}
-              </div>
-              <div>
-                Output ($/1M tokens):{" $"}
-                {OpenAIChatModels[config?.model]?.outputFee?.toLocaleString('en-US', {
-                  minimumFractionDigits: 3,
-                  maximumFractionDigits: 3,
-                }) || '0.000'}
-              </div>
+              {loadingModels ? (
+                <div>Loading model details...</div>
+              ) : (
+                <>
+                  <div>Context Length: {currentModelDetails?.context?.toLocaleString('en-US') || 'N/A'}</div>
+                  <div>
+                    Input ($/1M tokens):{" $ "}
+                    {formatPrice(currentModelDetails?.inputFee)}
+                  </div>
+                  <div>
+                    Output ($/1M tokens):{" $"}
+                    {formatPrice(currentModelDetails?.outputFee)}
+                  </div>
+                </>
+              )}
             </div>
             <ApiKey />
           </div>
