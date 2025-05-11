@@ -1,0 +1,98 @@
+{
+    "data": [        
+        {
+            "id": "openai/gpt-4.1",
+            "name": "OpenAI: GPT-4.1",
+            "created": 1744651385,
+            "description": "GPT-4.1 is a flagship large language model optimized for advanced instruction following, real-world software engineering, and long-context reasoning. It supports a 1 million token context window and outperforms GPT-4o and GPT-4.5 across coding (54.6% SWE-bench Verified), instruction compliance (87.4% IFEval), and multimodal understanding benchmarks. It is tuned for precise code diffs, agent reliability, and high recall in large document contexts, making it ideal for agents, IDE tooling, and enterprise knowledge retrieval.",
+            "context_length": 1047576,
+            "architecture": {
+                "modality": "text+image->text",
+                "input_modalities": [
+                    "image",
+                    "text"
+                ],
+                "output_modalities": [
+                    "text"
+                ],
+                "tokenizer": "GPT",
+                "instruct_type": null
+            },
+            "pricing": {
+                "prompt": "0.000002",
+                "completion": "0.000008",
+                "request": "0",
+                "image": "0",
+                "web_search": "0",
+                "internal_reasoning": "0",
+                "input_cache_read": "0.0000005"
+            },
+            "top_provider": {
+                "context_length": 1047576,
+                "max_completion_tokens": 32768,
+                "is_moderated": true
+            },
+            "per_request_limits": null,
+            "supported_parameters": [
+                "tools",
+                "tool_choice",
+                "max_tokens",
+                "temperature",
+                "top_p",
+                "stop",
+                "frequency_penalty",
+                "presence_penalty",
+                "web_search_options",
+                "seed",
+                "logit_bias",
+                "logprobs",
+                "top_logprobs",
+                "response_format",
+                "structured_outputs"
+            ]
+        },
+        {
+            "id": "openai/o4-mini-high",
+            "name": "OpenAI: o4 Mini High",
+            "created": 1744824212,
+            "description": "OpenAI o4-mini-high is the same model as [o4-mini](/openai/o4-mini) with reasoning_effort set to high. \n\nOpenAI o4-mini is a compact reasoning model in the o-series, optimized for fast, cost-efficient performance while retaining strong multimodal and agentic capabilities. It supports tool use and demonstrates competitive reasoning and coding performance across benchmarks like AIME (99.5% with Python) and SWE-bench, outperforming its predecessor o3-mini and even approaching o3 in some domains.\n\nDespite its smaller size, o4-mini exhibits high accuracy in STEM tasks, visual problem solving (e.g., MathVista, MMMU), and code editing. It is especially well-suited for high-throughput scenarios where latency or cost is critical. Thanks to its efficient architecture and refined reinforcement learning training, o4-mini can chain tools, generate structured outputs, and solve multi-step tasks with minimal delay—often in under a minute.",
+            "context_length": 200000,
+            "architecture": {
+                "modality": "text+image->text",
+                "input_modalities": [
+                    "image",
+                    "text",
+                    "file"
+                ],
+                "output_modalities": [
+                    "text"
+                ],
+                "tokenizer": "Other",
+                "instruct_type": null
+            },
+            "pricing": {
+                "prompt": "0.0000011",
+                "completion": "0.0000044",
+                "request": "0",
+                "image": "0.0008415",
+                "web_search": "0",
+                "internal_reasoning": "0",
+                "input_cache_read": "0.000000275"
+            },
+            "top_provider": {
+                "context_length": 200000,
+                "max_completion_tokens": 100000,
+                "is_moderated": true
+            },
+            "per_request_limits": null,
+            "supported_parameters": [
+                "tools",
+                "tool_choice",
+                "seed",
+                "max_tokens",
+                "response_format",
+                "structured_outputs"
+            ]
+        }
+    ]
+}

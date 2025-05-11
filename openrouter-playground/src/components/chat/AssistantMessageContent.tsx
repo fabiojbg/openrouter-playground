@@ -105,6 +105,24 @@ export default function AssistantMessageContent({ content, ...props }: Props) {
                 ? props.children.join('') 
                 : props.children;
               navigator.clipboard.writeText(codeContent);
+              // Show copied message
+              const copiedMessage = document.createElement('div');
+              copiedMessage.textContent = 'Copied to clipboard';
+              copiedMessage.style.position = 'fixed';
+              copiedMessage.style.top = '50%';
+              copiedMessage.style.left = '50%';
+              copiedMessage.style.transform = 'translate(-50%, -50%)';
+              copiedMessage.style.backgroundColor = 'rgba(103, 235, 14, 0.64)';
+              copiedMessage.style.color = 'white';
+              copiedMessage.style.padding = '1rem 2rem';
+              copiedMessage.style.borderRadius = '0.5rem';
+              copiedMessage.style.zIndex = '10000';
+              copiedMessage.style.fontSize = '1.25rem';
+              copiedMessage.style.fontWeight = 'bold';
+              document.body.appendChild(copiedMessage);
+              setTimeout(() => {
+                document.body.removeChild(copiedMessage);
+              }, 3000);
             }}
             className="absolute right-2 top-2 rounded bg-gray-700/80 px-2 py-1 text-sm text-white backdrop-blur hover:bg-gray-600/80"
           >
