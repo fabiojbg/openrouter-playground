@@ -32,7 +32,11 @@ export default function ApiKey({}: Props) {
             </button>
             <button
               className="text-xl opacity-60 transition-opacity hover:opacity-100"
-              onClick={clearToken}
+              onClick={() => {
+                if (window.confirm("Are you sure you want to clear your API key?")) {
+                  clearToken();
+                }
+              }}
             >
               <MdDelete />
             </button>

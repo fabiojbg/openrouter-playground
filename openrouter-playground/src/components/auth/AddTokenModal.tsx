@@ -16,8 +16,10 @@ export default function AddTokenModal({ className }: Props) {
   };
 
   const handleClear = () => {
-    clearToken();
-    setOpen(false);
+    if (window.confirm("Are you sure you want to clear your API key?")) {
+      clearToken();
+      setOpen(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
