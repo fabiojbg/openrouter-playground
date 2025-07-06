@@ -2,7 +2,7 @@ import { useOpenAI } from "@/context/OpenAIProvider";
 import React from "react";
 import Dropdown from "../input/Dropdown";
 import Slider from "../input/Slider";
-import { OpenAIChatModels, OpenAIConfig } from "@/utils/OpenAI";
+import { OpenAIConfig } from "@/utils/OpenAI";
 import useModels from "../hooks/useModels";
 
 type Props = {};
@@ -33,20 +33,34 @@ export default function ConfigSidebar({}: Props) {
         onSelect={(option) => handleUpdateConfig("model", option)}
       />
       <div className="text-sm text-gray-600 space-y-1 mt-1">
-<div>Context Length: {OpenAIChatModels[config.model]?.context?.toLocaleString('en-US', { useGrouping: true }) || 'N/A'}</div>
+        <div>
+          Context Length:{" "}
+          {models
+            .find((model) => model.id === config.model)
+            ?.context?.toLocaleString("en-US", { useGrouping: true }) || "N/A"}
+        </div>
         <div>
           Input ($/1M tokens):{" $ "}
-          {OpenAIChatModels[config.model]?.inputFee?.toLocaleString('en-US', {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3,
-          }) || '0.000'}
+          {(
+            parseFloat(
+              models.find((model) => model.id === config.model)?.inputFee || "0"
+            ) * 1000000
+          ).toLocaleString("en-US", {
+            minimumFractionDigits: 4,
+            maximumFractionDigits: 6,
+          }) || "0.000"}
         </div>
         <div>
           Output ($/1M tokens):{" $ "}
-          {OpenAIChatModels[config.model]?.outputFee?.toLocaleString('en-US', {
+          {(
+            parseFloat(
+              models.find((model) => model.id === config.model)?.outputFee ||
+                "0"
+            ) * 1000000
+          ).toLocaleString("en-US", {
             minimumFractionDigits: 3,
             maximumFractionDigits: 3,
-          }) || '0.000'}
+          }) || "0.000"}
         </div>
       </div>
 
@@ -61,7 +75,10 @@ export default function ConfigSidebar({}: Props) {
       />
       <Slider
         label="maximum length"
-        range={[0, OpenAIChatModels[config.model].maxLimit || 8192]}
+        range={[
+          0,
+          models.find((model) => model.id === config.model)?.maxLimit || 8192,
+        ]}
         step={1}
         value={config.max_tokens as number}
         onChange={(value: OpenAIConfig["max_tokens"]) =>
