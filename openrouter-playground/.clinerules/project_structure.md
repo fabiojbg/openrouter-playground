@@ -7,6 +7,7 @@ The project is a Next.js application built with TypeScript and styled using Tail
 - working with the project: To know what the project is about and how it is structured, read the README.md and the sections 'Project Structure' and 'Key Modules & Responsibilities' below.
 - Pay attention to the MCP Tools available to use them whenever necessary
 - Keep README.md and the sections "Project Structure" and "Module Responsibilities" in this file(.clinerules) in sync with new capabilities
+- this project use yarn. So you must use it to install packages or run
 
 # Project Structure
 

@@ -41,6 +41,7 @@ const defaultContext = {
   loadConversation: (id: string, conversation: Conversation) => {},
   toggleMessageRole: (id: number) => {},
   updateMessageContent: (id: number, content: string) => {},
+  removeLastMessage: () => {}, // Added removeLastMessage
   updateConfig: (newConfig: Partial<OpenAIConfig>) => {},
   submit: () => {},
   loading: true,
@@ -70,6 +71,7 @@ const OpenAIContext = React.createContext<{
   loadConversation: (id: string, conversation: Conversation) => void;
   toggleMessageRole: (id: number) => void;
   updateMessageContent: (id: number, content: string) => void;
+  removeLastMessage: () => void; // Added removeLastMessage
   updateConfig: (newConfig: Partial<OpenAIConfig>) => void;
   submit: () => void;
   loading: boolean;
@@ -257,6 +259,21 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     if (id === conversationId) clearConversation();
   };
 
+  const removeLastMessage = useCallback(() => {
+    setMessages((prev) => {
+      const newMessages = [...prev];
+      // Remove the last assistant message (content and reasoning)
+      if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === "assistant") {
+        newMessages.pop();
+      }
+      // Remove the last user message
+      if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === "user") {
+        newMessages.pop();
+      }
+      return newMessages;
+    });
+  }, []);
+
   const updateConversationName = (id: string, name: string) => {
     setConversations((prev) => {
       const conversation = prev[id];
@@ -421,6 +438,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       clearConversations,
       toggleMessageRole,
       updateMessageContent,
+      removeLastMessage, // Added removeLastMessage
       updateConfig,
       submit,
       error,
@@ -440,6 +458,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       error,
       availableModels, // Added to dependency array
       loadingModels, // Added to dependency array
+      removeLastMessage, // Added to dependency array
     ]
   );
 

@@ -1,11 +1,11 @@
 import React from "react";
 import { useOpenAI } from "@/context/OpenAIProvider";
-import { MdSend } from "react-icons/md";
+import { MdSend, MdUndo } from "react-icons/md"; // Added MdUndo
 
 type Props = {};
 
 export default function ChatInput({}: Props) {
-  const { addMessage, loading } = useOpenAI();
+  const { addMessage, loading, messages, removeLastMessage } = useOpenAI(); // Added messages and removeLastMessage
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const [input, setInput] = React.useState("");
@@ -62,6 +62,16 @@ export default function ChatInput({}: Props) {
             value={input}
             rows={1}
           />
+          {messages.length > 0 && ( // Only show undo button if there are messages
+            <button
+              type="button" // Changed to type="button" to prevent form submission
+              onClick={removeLastMessage}
+              className="rounded p-4 text-primary hover:bg-primary/50"
+              title="Remove last message"
+            >
+              <MdUndo />
+            </button>
+          )}
           <button
             type="submit"
             className="rounded p-4 text-primary hover:bg-primary/50"

@@ -1,5 +1,5 @@
 import { useOpenAI } from "@/context/OpenAIProvider";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
@@ -8,23 +8,17 @@ type Props = {};
 
 export default function ChatMessages({}: Props) {
   const { messages, submit } = useOpenAI();
-  const messageContainer = React.useRef<HTMLDivElement>(null);
-  const [scrolling, setScrolling] = React.useState(false);
-  const [prevMessageLength, setPrevMessageLength] = React.useState(0);
+  const messageContainer = useRef<HTMLDivElement>(null);
+  const [scrolling, setScrolling] = useState(false);
+  const [prevMessageLength, setPrevMessageLength] = useState(0);
+  const [prevLastMessageContent, setPrevLastMessageContent] = useState('');
 
   // Scroll handling for auto scroll
   useEffect(() => {
     const handleScroll = () => {
       if (messageContainer.current) {
-        if (
-          messageContainer.current.scrollTop <
-          messageContainer.current.scrollHeight -
-            messageContainer.current.offsetHeight
-        ) {
-          setScrolling(true);
-        } else {
-          setScrolling(false);
-        }
+        const isAtBottom = messageContainer.current.scrollHeight - messageContainer.current.scrollTop <= messageContainer.current.offsetHeight + 1;
+        setScrolling(!isAtBottom);
       }
     };
 
@@ -39,18 +33,22 @@ export default function ChatMessages({}: Props) {
     };
   }, []);
 
+  // Auto-scroll logic
   useEffect(() => {
-    if (messages.length != prevMessageLength) {
-      setPrevMessageLength(messages.length);
+    if (!messageContainer.current) return;
+
+    const currentLastMessageContent = messages.length > 0 ? messages[messages.length - 1].content : '';
+    const isNewMessage = messages.length !== prevMessageLength;
+    const isStreamingUpdate = currentLastMessageContent !== prevLastMessageContent && messages.length > 0 && messages[messages.length - 1].role === 'assistant';
+
+    if (!scrolling || isNewMessage || isStreamingUpdate) {
+      messageContainer.current.scrollTop = messageContainer.current.scrollHeight;
     }
 
-    if (
-      messageContainer.current &&
-      (!scrolling || messages.length != prevMessageLength)
-    ) {
-      messageContainer.current.scrollTop =
-        messageContainer.current.scrollHeight;
-    }
+    // Update states for the next render cycle
+    setPrevMessageLength(messages.length);
+    setPrevLastMessageContent(currentLastMessageContent);
+
   }, [messages, scrolling]);
 
   // Command Enter to submit
