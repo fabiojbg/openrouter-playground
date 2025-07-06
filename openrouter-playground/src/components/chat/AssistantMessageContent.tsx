@@ -139,17 +139,19 @@ export default function AssistantMessageContent({ content, reasoning, ...props }
   return (
     <>
       {reasoning && (
-        <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          <p className="font-bold">Reasoning:</p>
-          <ReactMarkdown
-            remarkPlugins={[remarkMath]}
-            rehypePlugins={[rehypeKatex]}
-            components={MarkdownComponents}
-            {...props}
-          >
-            {reasoning}
-          </ReactMarkdown>
-        </div>
+        <>
+          <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">Reasoning:</p>
+          <div className="text-sm text-gray-500 dark:text-gray-400 max-h-60 overflow-y-auto">
+            <ReactMarkdown
+              remarkPlugins={[remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+              components={MarkdownComponents}
+              {...props}
+            >
+              {reasoning}
+            </ReactMarkdown>
+          </div>
+        </>
       )}
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
