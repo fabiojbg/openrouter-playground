@@ -21,7 +21,6 @@ export default function ChatHeader({}: Props) {
       {/* Animate slide in from left */}
       <Transition
         show={isOpen}
-        className="absolute z-30 h-[calc(100%-50px)] w-full"
         enter="transition ease-out duration-300"
         enterFrom="transform -translate-x-full"
         enterTo="transform translate-x-0"
@@ -29,7 +28,7 @@ export default function ChatHeader({}: Props) {
         leaveFrom="transform translate-x-0"
         leaveTo="transform -translate-x-full"
       >
-        <div className="shadow-4xl h-full w-2/3">
+        <div className="absolute z-30 h-[calc(100%-50px)] w-full shadow-4xl h-full w-2/3">
           <ChatSidebar />
         </div>
         <button
