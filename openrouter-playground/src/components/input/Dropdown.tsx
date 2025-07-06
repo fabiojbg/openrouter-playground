@@ -32,9 +32,12 @@ export default function Dropdown({
     setShow(false);
   };
 
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredOptions = options.filter(option => {
+    const lowerCaseLabel = option.label.toLowerCase();
+    const searchWords = searchTerm.toLowerCase().split(" ").filter(Boolean); // Split by space and remove empty strings
+
+    return searchWords.every(word => lowerCaseLabel.includes(word));
+  });
 
   return (
     <div className="relative flex flex-col rounded">
