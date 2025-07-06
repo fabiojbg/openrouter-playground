@@ -8,11 +8,20 @@ html {
 
 .p-3
 {
-  padding: 0.50rem;
+  padding: 0.25rem;
 }
 .p-4
 {
-  padding: 0.75rem;
+  padding: 0.50rem;
+}
+
+.border-white\/10 {
+    border-color: rgba(255, 255, 255, 0.445);
+}
+
+.model-panel
+{
+  background-color: #182435;
 }
 
 @layer base {

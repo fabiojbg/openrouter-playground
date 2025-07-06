@@ -42,7 +42,7 @@ export default function ChatSidebar({}: Props) {
 
         <Conversations />
 
-        <div className="flex flex-col gap-y-2 border-y border-white/10 py-2">
+        <div className="flex flex-col gap-y-2 border-y border-white/10 py-2 model-panel" >
           <div className="flex flex-col border-b border-white/10 gap-y-2">
             <CurrentModel />
             <div className="text-sm text-gray-300 space-y-1 px-4 pb-2">
