@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import rangeParser from "parse-numeric-range";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -36,6 +36,14 @@ type Props = {
 };
 
 export default function AssistantMessageContent({ content, reasoning, ...props }: Props) {
+  const reasoningRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (reasoningRef.current) {
+      reasoningRef.current.scrollTop = reasoningRef.current.scrollHeight;
+    }
+  }, [reasoning]);
+
   const MarkdownComponents: any = {
     // Work around for not rending <em> and <strong> tags
     em: ({ node, inline, className, children, ...props }: any) => {
@@ -141,7 +149,7 @@ export default function AssistantMessageContent({ content, reasoning, ...props }
       {reasoning && (
         <>
           <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">Reasoning:</p>
-          <div className="text-sm text-gray-500 dark:text-gray-400 max-h-60 overflow-y-auto">
+          <div ref={reasoningRef} className="text-sm text-gray-500 dark:text-gray-400 max-h-60 overflow-y-auto">
             <ReactMarkdown
               remarkPlugins={[remarkMath]}
               rehypePlugins={[rehypeKatex]}
