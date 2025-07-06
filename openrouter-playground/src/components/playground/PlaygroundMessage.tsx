@@ -3,13 +3,14 @@ import { OpenAIChatMessage } from "@/utils/OpenAI";
 import React from "react";
 import { MdOutlineCancel } from "react-icons/md";
 import { usePlayground } from "@/context/PlaygroundProvider";
+import AssistantMessageContent from "../chat/AssistantMessageContent";
 
 type Props = {
   message: OpenAIChatMessage;
 };
 
 export default function PlaygroundMessage({
-  message: { id, role, content },
+  message: { id, role, content, reasoning },
 }: Props) {
   const { showConversations } = usePlayground();
   const [focus, setFocus] = React.useState(false);
@@ -20,12 +21,12 @@ export default function PlaygroundMessage({
 
   const { submit } = useOpenAI(); // Add this line to get the submit function
 
-const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-  if (e.key === "Enter") {
-    e.preventDefault(); // Prevent default behavior (new line)
-    // Removed submit call since it's handled in PlaygroundMessages
-  }
-};
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent default behavior (new line)
+      // Removed submit call since it's handled in PlaygroundMessages
+    }
+  };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (e.target.value === content || id === undefined) return;
@@ -84,13 +85,17 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         </button>
       </div>
       <div className="basis-8/12 items-center">
-        <textarea
-          className="text-md w-full resize-none rounded bg-transparent p-4 text-gray-700 focus:border-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"
-          value={content}
-          onChange={handleContentChange}
-          placeholder={`Enter ${role} message here`}
-          ref={textAreaRef}
-        />
+        {role === "assistant" ? (
+          <AssistantMessageContent content={content} reasoning={reasoning} />
+        ) : (
+          <textarea
+            className="text-md w-full resize-none rounded bg-transparent p-4 text-gray-700 focus:border-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"
+            value={content}
+            onChange={handleContentChange}
+            placeholder={`Enter ${role} message here`}
+            ref={textAreaRef}
+          />
+        )}
       </div>
 
       <div className="flex basis-1/12 justify-center">
