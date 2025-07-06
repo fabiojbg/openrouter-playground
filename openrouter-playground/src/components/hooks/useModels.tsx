@@ -34,7 +34,7 @@ export default function useModels() {
           setModels([]);
         } else {
           const data = await response.json();
-          setModels(data.chatModels || []);
+          setModels(data.openRouterModels || []);
         }
       } catch (error) {
         console.error("Error fetching models:", error);

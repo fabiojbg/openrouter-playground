@@ -20,6 +20,7 @@ interface StreamResponse {
   choices: Array<{
     delta: {
       content?: string;
+      reasoning?: string; // Added reasoning field
     };
     finish_reason?: string;
   }>;
@@ -67,10 +68,15 @@ export const getOpenAICompletion = async (
 
           try {
             const json = JSON.parse(data) as StreamResponse;
-const text = json.choices && json.choices.length > 0 ? json.choices[0]?.delta?.content || "" : "";
+            const delta = json.choices && json.choices.length > 0 ? json.choices[0]?.delta : {};
             
-            if (text) {
-              const queue = encoder.encode(text);
+            if (delta.reasoning) {
+              const queue = encoder.encode(JSON.stringify({ type: "reasoning", value: delta.reasoning }) + "\n");
+              controller.enqueue(queue);
+            }
+
+            if (delta.content) {
+              const queue = encoder.encode(JSON.stringify({ type: "content", value: delta.content }) + "\n");
               controller.enqueue(queue);
             }
 

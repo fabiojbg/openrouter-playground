@@ -9,7 +9,7 @@ type Props = {
   message: OpenAIChatMessage;
 };
 
-export default function ChatMessage({ message: { id, role, content } }: Props) {
+export default function ChatMessage({ message: { id, role, content, reasoning } }: Props) {
   const [hover, setHover] = React.useState(false);
 
   return (
@@ -33,7 +33,7 @@ export default function ChatMessage({ message: { id, role, content } }: Props) {
             {role === "user" ? (
               <UserMessageContent content={content} />
             ) : (
-              <AssistantMessageContent content={content} />
+              <AssistantMessageContent content={content} reasoning={reasoning} />
             )}
           </div>
         </div>

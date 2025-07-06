@@ -1,20 +1,17 @@
-# Presentation
-- This project is a ChatGPT like UI where users can chat with LLMs from the OpenRouter provider (https://openrouter.ai).
-The user must register their apikey to start using the provider model's that will be listed in a searchable list.
-
-# Project Guidelines
-
-- You should keep this file updated in case of new changes
-
-# Project Structure: OpenRouter Playground
-
-This document outlines the directory and file structure of the OpenRouter Playground project, along with the main responsibilities of each module.
-
-## Overview
+# Project Overview
 
 The project is a Next.js application built with TypeScript and styled using Tailwind CSS. It aims to provide a user-friendly interface to test OpenRouter API keys, offering both a ChatGPT-like environment and a more detailed Playground.
 
-## File & Directory Tree
+# Project Guidelines
+
+- working with the project: To know what the project is about and how it is structured, read the README.md and the sections 'Project Structure' and 'Key Modules & Responsibilities' below.
+- Pay attention to the MCP Tools available to use them whenever necessary
+- Keep README.md and the sections "Project Structure" and "Module Responsibilities" in this file(.clinerules) in sync with new capabilities
+
+# Project Structure
+
+- The project is structured to separate concerns and maintain a clean architecture. 
+You must mantain this structure updated in case of any change in it or in file´s responsabilities
 
 ```
 .

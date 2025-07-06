@@ -32,9 +32,10 @@ const syntaxTheme = oneDark;
 
 type Props = {
   content: string;
+  reasoning?: string;
 };
 
-export default function AssistantMessageContent({ content, ...props }: Props) {
+export default function AssistantMessageContent({ content, reasoning, ...props }: Props) {
   const MarkdownComponents: any = {
     // Work around for not rending <em> and <strong> tags
     em: ({ node, inline, className, children, ...props }: any) => {
@@ -136,13 +137,28 @@ export default function AssistantMessageContent({ content, ...props }: Props) {
   };
 
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkMath]}
-      rehypePlugins={[rehypeKatex]}
-      components={MarkdownComponents}
-      {...props}
-    >
-      {content}
-    </ReactMarkdown>
+    <>
+      {reasoning && (
+        <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+          <p className="font-bold">Reasoning:</p>
+          <ReactMarkdown
+            remarkPlugins={[remarkMath]}
+            rehypePlugins={[rehypeKatex]}
+            components={MarkdownComponents}
+            {...props}
+          >
+            {reasoning}
+          </ReactMarkdown>
+        </div>
+      )}
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={MarkdownComponents}
+        {...props}
+      >
+        {content}
+      </ReactMarkdown>
+    </>
   );
 }

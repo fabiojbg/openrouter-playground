@@ -181,7 +181,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   }, [availableModels, config.model, loadingModels, config.max_tokens]); // Added config.max_tokens to dependencies
 
 
-  const updateMessageContent = (id: number, content: string) => {
+  const updateMessageContent = (id: number, content: string, isReasoning: boolean = false) => {
     setMessages((prev) => {
       const index = prev.findIndex((message) => message.id === id);
       if (index === -1) return prev;
@@ -190,7 +190,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         ...prev.slice(0, index),
         {
           ...message,
-          content,
+          content: isReasoning ? message.content : content,
+          reasoning: isReasoning ? content : message.reasoning,
         },
         ...prev.slice(index + 1),
       ];
@@ -275,6 +276,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   };
 
   const submit = useCallback(async (messages_: OpenAIChatMessage[] = []) => {
+    console.count("Submit function calls");
     console.log("Submit function called. Loading state:", loading);
     if (loading) return;
     setLoading(true);
@@ -289,6 +291,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           role,
           content,
         })),
+        reasoning: config.reasoning, // Pass reasoning config
       };
       console.log("Sending request to API with payload:", payload);
 
@@ -321,11 +324,14 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
       const messageId = Date.now();
       let accumulatedContent = "";
+      let accumulatedReasoning = "";
+      let buffer = ""; // Buffer to accumulate partial JSON chunks
       
       setMessages((prev) => [...prev, {
         id: messageId,
         role: "assistant",
         content: "",
+        reasoning: "",
       } as OpenAIChatMessage]);
 
       let done = false;
@@ -333,9 +339,27 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
         if (value) {
-          const chunkValue = decoder.decode(value);
-          accumulatedContent += chunkValue;
-          updateMessageContent(messageId, accumulatedContent);
+          buffer += decoder.decode(value);
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ""; // Keep the last, potentially incomplete, line in the buffer
+
+          for (const line of lines) {
+            if (line.trim() === "") continue; // Skip empty lines
+            try {
+              const parsedChunk = JSON.parse(line);
+              if (parsedChunk.type === "reasoning") {
+                accumulatedReasoning += parsedChunk.value;
+                updateMessageContent(messageId, accumulatedReasoning, true);
+              } else if (parsedChunk.type === "content") {
+                accumulatedContent += parsedChunk.value;
+                updateMessageContent(messageId, accumulatedContent);
+              }
+            } catch (e) {
+              console.error("Error parsing line from stream:", e, line);
+              // If a line is not valid JSON, it's likely a malformed chunk or an unexpected message.
+              // For now, we'll just log it and ignore, assuming all valid data will be JSON.
+            }
+          }
         }
       }
     } catch (error: any) {

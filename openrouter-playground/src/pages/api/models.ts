@@ -1,39 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-interface TogetherAIModel {
-  id: string;
-  object: string;
-  created: number;
-  type: string;
-  running: boolean;
-  display_name: string;
-  organization: string;
-  link: string;
-  license: string;
-  context_length?: number;
-  config: {
-    chat_template: string | null;
-    stop: string[];
-    bos_token: string | null;
-    eos_token: string | null;
-  };
-  pricing: {
-    hourly: number;
-    input: number;
-    output: number;
-    base: number;
-    finetune: number;
-  };
+interface OpenRouterModelResponse {
+  data: Array<{
+    id: string;
+    name: string;
+    description: string;
+    pricing: {
+      prompt: string; // e.g., "0.000001"
+      completion: string; // e.g., "0.000001"
+      unit: string; // e.g., "1M tokens"
+    };
+    context_length: number;
+  }>;
 }
 
-interface OpenAIModel { // Keep OpenAIModel interface as it's used in OpenAI.constants.ts
-  id: string;
-  name: string;
-  inputFee: number;
-  outputFee: number;
-  context: number;
-  maxLimit: number;
-}
+import { OpenAIModel } from "../../utils/OpenAI/OpenAI.types";
 
 export default async function handler(
   req: NextApiRequest,
@@ -45,9 +26,12 @@ export default async function handler(
   }
 
   try {
-    const response = await fetch("https://api.together.xyz/v1/models", {
+    const response = await fetch("https://openrouter.ai/api/v1/models", {
       headers: {
         Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/fabiojbg", // Required by OpenRouter
+        "X-Title": "OpenRouter Playground", // Optional but recommended
       },
     });
 
@@ -56,21 +40,21 @@ export default async function handler(
       return res.status(response.status).json({ error: errorData });
     }
 
-    const data: TogetherAIModel[] = await response.json();
-    const togetherAiModels: OpenAIModel[] = data // Rename chatModels to togetherAiModels
+    const data: OpenRouterModelResponse = await response.json();
+    const openRouterModels: OpenAIModel[] = data.data
       .map((model) => ({
         id: model.id,
-        name: model.display_name,
-        inputFee: model.pricing.input,
-        outputFee: model.pricing.output,
-        context: model.context_length || 4096, // Default context length
-        maxLimit: model.context_length || 4096, // Default max limit
+        name: model.name,
+        inputFee: model.pricing.prompt,
+        outputFee: model.pricing.completion,
+        context: model.context_length,
+        maxLimit: model.context_length,
       }))
       .sort((a, b) => a.id.localeCompare(b.id));
 
     return res.status(200).json({
-      models: data.map(model => model.id), // Keep returning all model ids for now
-      togetherAiModels, // Return all transformed models
+      models: data.data.map(model => model.id),
+      openRouterModels,
     });
   } catch (e: any) {
     console.error(e);

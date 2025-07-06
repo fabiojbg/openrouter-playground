@@ -2,6 +2,7 @@ export interface OpenAIChatMessage { // Removed import for OpenAIChatModels
   id?: number;
   role: "system" | "assistant" | "user";
   content: string;
+  reasoning?: string; // Added reasoning field
 }
 
 export interface OpenAISystemMessage {
@@ -11,6 +12,9 @@ export interface OpenAISystemMessage {
 
 export interface OpenAIConfig {
   model: string; // Changed from keyof typeof OpenAIChatModels to string
+  reasoning?: {
+    max_tokens?: number;
+  };
   temperature?: number;
   max_tokens?: number;
   max_completion_tokens?: number;
@@ -29,7 +33,7 @@ export interface OpenAIModel {
   id: string;
   name: string;
   maxLimit: number;
-  inputFee: number;
-  outputFee: number;
+  inputFee: string;
+  outputFee: string;
   context: number;
 }

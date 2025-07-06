@@ -20,11 +20,12 @@ export default function ChatSidebar({}: Props) {
     return models.find(m => m.id === config.model);
   }, [config?.model, models]);
 
-  const formatPrice = (price: number | undefined) => {
-    if (typeof price === 'undefined') return '0.00'; // Default to 2 decimal places
-    return price.toLocaleString('en-US', {
-      minimumFractionDigits: 2, // Changed to 2
-      maximumFractionDigits: 2, // Changed to 2
+  const formatPrice = (price: string | undefined) => {
+    if (typeof price === 'undefined') return '0.00';
+    const numericPrice = parseFloat(price) * 1_000_000; // Multiply by 1 million
+    return numericPrice.toLocaleString('en-US', {
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4,
     });
   };
 
