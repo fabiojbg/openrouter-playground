@@ -9,9 +9,8 @@ type Props = {
   message: OpenAIChatMessage;
 };
 
-export default function PlaygroundMessage({
-  message: { id, role, content, reasoning },
-}: Props) {
+export default function PlaygroundMessage({ message }: Props) {
+  const { id, role, content, reasoning } = message;
   const { showConversations } = usePlayground();
   const [focus, setFocus] = React.useState(false);
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -86,7 +85,7 @@ export default function PlaygroundMessage({
       </div>
       <div className="basis-8/12 items-center">
         {role === "assistant" ? (
-          <AssistantMessageContent content={content} reasoning={reasoning} />
+          <AssistantMessageContent message={message} />
         ) : (
           <textarea
             className="text-md w-full resize-none rounded bg-transparent p-4 text-gray-700 focus:border-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"

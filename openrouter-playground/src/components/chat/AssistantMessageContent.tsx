@@ -38,7 +38,7 @@ type Props = {
 };
 
 export default function AssistantMessageContent({ message, ...props }: Props) {
-  const { content, reasoning, reasoningTime, isReasoning } = message; // Destructure message
+  const { content = "", reasoning, reasoningTime, isReasoning } = message || {}; // Destructure message with default for content
   const reasoningRef = useRef<HTMLDivElement>(null);
   const [showStats, setShowStats] = useState(false); // State for showing stats modal
 
