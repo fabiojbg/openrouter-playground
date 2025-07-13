@@ -168,12 +168,13 @@ export default function AssistantMessageContent({ content, reasoning, reasoningT
     <>
       {reasoning && (
         <>
-          {isReasoning && reasoningTime !== undefined && (
+          {reasoningTime !== undefined && (
             <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">
               Reasoning: ({reasoningTime.toFixed(1)}s)
             </p>
-          )}
-          {/* <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">Reasoning:</p> */}
+          )}          
+          {reasoningTime === undefined && (
+            <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">Reasoning:</p> )}            
           <div ref={reasoningRef} className="text-sm text-gray-500 dark:text-gray-400 max-h-60 overflow-y-auto">
             <ReactMarkdown
               remarkPlugins={[remarkMath]}
