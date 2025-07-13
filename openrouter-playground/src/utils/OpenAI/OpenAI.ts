@@ -1,9 +1,12 @@
-import { OpenAIChatMessage, OpenAIConfig, OpenAIRequest, Usage } from "./OpenAI.types"; // Added OpenAIRequest, Usage
+import { OpenAIChatMessage, OpenAIConfig, OpenAIRequest, Usage, StreamResponse } from "./OpenAI.types";
 import {
   createParser,
   ParsedEvent,
   ReconnectInterval,
 } from "eventsource-parser";
+import { OPENROUTER_API_URL, OPENROUTER_HEADERS } from "./OpenAI.constants";
+import { OpenAIError } from "./OpenAI.errors";
+import { createStreamProcessor } from "./OpenAI.stream";
 
 export const defaultConfig = {
   model: "deepseek/deepseek-r1:free",
@@ -16,17 +19,6 @@ export const defaultConfig = {
 
 // Removed local OpenAIRequest type definition
 
-interface StreamResponse {
-  choices: Array<{
-    delta: {
-      content?: string;
-      reasoning?: string; // Added reasoning field
-    };
-    finish_reason?: string;
-  }>;
-  usage?: Usage; // Added usage field
-}
-
 export const getOpenAICompletion = async (
   token: string,
   payload: OpenAIRequest,
@@ -38,12 +30,11 @@ export const getOpenAICompletion = async (
   const startTime = requestStartTime; // Use the passed startTime
   let firstTokenTime: number | null = null; // Initialize firstTokenTime
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const response = await fetch(OPENROUTER_API_URL, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://github.com/fabiojbg", // Required by OpenRouter
-      "X-Title": "OpenRouter Playground", // Optional but recommended
+      ...OPENROUTER_HEADERS,
     },
     method: "POST",
     body: JSON.stringify({ ...payload, usage: { include: true } }), // Enable usage accounting
@@ -51,76 +42,18 @@ export const getOpenAICompletion = async (
 
   if (!response.ok) {
     const errorText = await response.text();
-    const error = new Error(errorText);
-    (error as any).status = response.status;
-    throw error;
+    throw new OpenAIError(`OpenRouter API Error: ${errorText}`, response.status);
   }
 
   if (!response.body) {
-    throw new Error("No response body received");
+    throw new OpenAIError("No response body received from OpenRouter API");
   }
 
   const stream = new ReadableStream({
     async start(controller) {
-      function onParse(event: ParsedEvent | ReconnectInterval) {
-        if (event.type === "event") {
-          const data = event.data;
-          
-          if (data === "[DONE]") {
-            controller.close();
-            return;
-          }
-
-          try {
-            const json = JSON.parse(data) as StreamResponse;            
-            const delta = json.choices && json.choices.length > 0 ? json.choices[0]?.delta : {};
-
-            // Capture first token time
-            if (firstTokenTime === null && (delta.reasoning || delta.content)) {
-              firstTokenTime = Date.now();
-            }
-            
-            if (delta.reasoning) {
-              const queue = encoder.encode(JSON.stringify({ type: "reasoning", value: delta.reasoning }) + "\n");
-              controller.enqueue(queue);
-            }
-
-            if (delta.content) {
-              const queue = encoder.encode(JSON.stringify({ type: "content", value: delta.content }) + "\n");
-              controller.enqueue(queue);
-            }
-
-            // Process usage data if present in any chunk
-            if (json.usage) {
-              const totalTime = (Date.now() - startTime) / 1000; // Total time in seconds
-              let tokensPerSecond = 0;
-              if (json.usage.total_tokens && totalTime > 0) {
-                tokensPerSecond = json.usage.total_tokens / totalTime;
-              }
-
-              const timeToFirstToken = firstTokenTime !== null ? (firstTokenTime - startTime) / 1000 : 0; // Time to first token in seconds
-
-              const usageData = {
-                ...json.usage,
-                totalTime,
-                tokensPerSecond,
-                timeToFirstToken, // Add timeToFirstToken
-              };
-              const queue = encoder.encode(JSON.stringify({ type: "usage", value: usageData }) + "\n");
-              controller.enqueue(queue);
-            }
-            // The stream will be closed when "[DONE]" is received.
-            // No need to close here based on finish_reason.
-          } catch (e) {
-            console.error("Error parsing stream:", e);
-            controller.error(e);
-          }
-        }
-      }
-
+      const onParse = createStreamProcessor({ startTime, firstTokenTime, controller, encoder });
       const parser = createParser(onParse);
       try {
-        // We've already checked response.body is not null above
         const reader = (response.body as ReadableStream).getReader();
         while (true) {
           const { done, value } = await reader.read();
@@ -130,7 +63,7 @@ export const getOpenAICompletion = async (
       } catch (e) {
         console.error("Error reading stream:", e);
         controller.error(e);
-          }
+      }
     },
   });
 

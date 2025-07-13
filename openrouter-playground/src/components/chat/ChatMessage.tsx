@@ -10,7 +10,7 @@ type Props = {
 };
 
 export default function ChatMessage({ message }: Props) {
-  const { id, role, content, reasoning, reasoningTime, isReasoning } = message;
+  const { id, role, content, reasoning, metadata } = message;
   const [hover, setHover] = React.useState(false);
 
   return (

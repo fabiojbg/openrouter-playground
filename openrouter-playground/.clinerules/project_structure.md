@@ -95,6 +95,9 @@ You must mantain this structure updated in case of any change in it or in file´
         ├── utils.ts             # General utility functions
         └── OpenAI/              # Utilities specific to OpenAI/OpenRouter API
             ├── index.ts           # Barrel file, exports modules from this directory
+            ├── OpenAI.constants.ts # Constants for OpenRouter API configuration
+            ├── OpenAI.errors.ts   # Custom error classes for OpenAI API interactions
+            ├── OpenAI.stream.ts   # Stream processing logic for OpenAI API responses
             ├── OpenAI.ts          # Core logic for API interaction
             └── OpenAI.types.ts    # TypeScript types for API data structures
 ```

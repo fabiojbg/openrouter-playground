@@ -1,13 +1,28 @@
-export interface OpenAIChatMessage { // Removed import for OpenAIChatModels
+export interface StreamResponse {
+  choices: Array<{
+    delta: {
+      content?: string;
+      reasoning?: string;
+    };
+    finish_reason?: string;
+  }>;
+  usage?: Usage;
+}
+
+export interface ResponseMetadata {
+  reasoningTime?: number;
+  isReasoning?: boolean;
+  totalTime?: number;
+  tokensPerSecond?: number;
+  usage?: Usage;
+}
+
+export interface OpenAIChatMessage {
   id?: number;
   role: "system" | "assistant" | "user";
   content: string;
-  reasoning?: string; // Added reasoning field
-  reasoningTime?: number; // Added reasoningTime field
-  isReasoning?: boolean; // Added isReasoning field
-  totalTime?: number; // Added totalTime field
-  tokensPerSecond?: number; // Added tokensPerSecond field
-  usage?: Usage; // Added usage field
+  reasoning?: string;
+  metadata?: ResponseMetadata;
 }
 
 export interface Usage {

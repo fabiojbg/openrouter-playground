@@ -30,7 +30,7 @@ export default function PlaygroundMessage({ message }: Props) {
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (e.target.value === content || id === undefined) return;
 
-    updateMessageContent(id, e.target.value);
+    updateMessageContent(id, e.target.value, "content");
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "40px";
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;

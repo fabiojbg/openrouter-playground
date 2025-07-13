@@ -1,5 +1,5 @@
 import React from 'react';
-import { OpenAIChatMessage } from '../../utils/OpenAI/OpenAI.types';
+import { OpenAIChatMessage, Usage } from '../../utils/OpenAI/OpenAI.types';
 
 interface ResponseStatsProps {
   message: OpenAIChatMessage;
@@ -7,11 +7,8 @@ interface ResponseStatsProps {
 }
 
 const ResponseStats: React.FC<ResponseStatsProps> = ({ message, onClose }) => {
-  if (!message.usage) {
-    return null;
-  }
-
-  const { usage, reasoningTime } = message; // Destructure usage and reasoningTime from message
+  const usage: Usage = message.metadata?.usage || {} as Usage;
+  const reasoningTime: number | null = message.metadata?.reasoningTime || null;
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
@@ -31,16 +28,16 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ message, onClose }) => {
           <div className="py-1 px-2">{usage.tokensPerSecond?.toFixed(2) || 'N/A'}</div>
 
           <div className="py-1 px-2 font-semibold">Total tokens:</div>
-          <div className="py-1 px-2">{usage.total_tokens}</div>
+          <div className="py-1 px-2">{usage.total_tokens || 'N/A'}</div>
 
           <div className="py-1 px-2 font-semibold">Prompt tokens:</div>
-          <div className="py-1 px-2">{usage.prompt_tokens}</div>
+          <div className="py-1 px-2">{usage.prompt_tokens || 'N/A'}</div>
 
           <div className="py-1 px-2 font-semibold">Reasoning tokens:</div>
           <div className="py-1 px-2">{usage.completion_tokens_details?.reasoning_tokens || 'N/A'}</div>
 
           <div className="py-1 px-2 font-semibold">Completion Tokens:</div>
-          <div className="py-1 px-2">{usage.completion_tokens}</div>
+          <div className="py-1 px-2">{usage.completion_tokens || 'N/A'}</div>
 
           <div className="py-1 px-2 font-semibold">Cached Tokens:</div>
           <div className="py-1 px-2">{usage.prompt_tokens_details?.cached_tokens || 'N/A'}</div>

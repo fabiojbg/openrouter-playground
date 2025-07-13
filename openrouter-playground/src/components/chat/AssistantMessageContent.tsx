@@ -34,13 +34,13 @@ SyntaxHighlighter.registerLanguage("json", json);
 const syntaxTheme = oneDark;
 
 type Props = {
-  message: OpenAIChatMessage; // Changed to pass the whole message object
+  message: OpenAIChatMessage;
 };
 
 export default function AssistantMessageContent({ message, ...props }: Props) {
-  const { content = "", reasoning, reasoningTime, isReasoning } = message || {}; // Destructure message with default for content
+  const { content = "", reasoning, metadata } = message || {};
   const reasoningRef = useRef<HTMLDivElement>(null);
-  const [showStats, setShowStats] = useState(false); // State for showing stats modal
+  const [showStats, setShowStats] = useState(false);
 
   useEffect(() => {
     if (reasoningRef.current) {
@@ -170,12 +170,12 @@ export default function AssistantMessageContent({ message, ...props }: Props) {
     <>
       {reasoning && (
         <>
-          {reasoningTime !== undefined && (
+          {metadata?.reasoningTime !== undefined && (
             <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">
-              Reasoning: ({reasoningTime.toFixed(1)}s)
+              Reasoning: ({metadata.reasoningTime.toFixed(1)}s)
             </p>
           )}          
-          {reasoningTime === undefined && (
+          {metadata?.reasoningTime === undefined && (
             <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">Reasoning:</p> )}            
           <div ref={reasoningRef} className="text-sm text-gray-500 dark:text-gray-400 max-h-60 overflow-y-auto">
             <ReactMarkdown
@@ -198,7 +198,7 @@ export default function AssistantMessageContent({ message, ...props }: Props) {
         {content}
       </ReactMarkdown>
 
-      {message.usage && (
+      {metadata?.usage && (
         <div className="flex justify-end mt-2">
           <button
             onClick={() => setShowStats(true)}

@@ -8,49 +8,49 @@ import {
   updateConversation,
 } from "@/utils/History";
 import {
-  defaultConfig,
   OpenAIChatMessage,
   OpenAIConfig,
   OpenAISystemMessage,
-  OpenAIModel, // Added OpenAIModel, removed OpenAIChatModels
-} from "@/utils/OpenAI";
+  OpenAIModel,
+  ResponseMetadata,
+  Usage,
+} from "@/utils/OpenAI/OpenAI.types";
+import { defaultConfig } from "@/utils/OpenAI/OpenAI";
 import React, { PropsWithChildren, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthProvider";
-import useModels from "@/components/hooks/useModels"; // Added useModels import
+import useModels from "@/components/hooks/useModels";
 
 const CHAT_ROUTE = "/";
 
 const defaultContext = {
-      systemMessage: {
-        role: "system",
-        content: "You are a helpful AI chatbot.",
-      } as OpenAISystemMessage,
-      messages: [] as OpenAIChatMessage[],
-      config: defaultConfig as OpenAIConfig,
-      updateSystemMessage: (content: string) => {},
-      addMessage: () => {},
-      removeMessage: (id: number) => {},
-      conversationName: "",
-      conversationId: "",
-      deleteConversation: () => {},
-      updateConversationName: () => {},
-      conversations: {} as History,
-      clearConversations: () => {},
-      clearConversation: () => {},
-      loadConversation: (id: string, conversation: Conversation) => {},
-      toggleMessageRole: (id: number) => {},
-      updateMessageContent: (id: number, content: string) => {},
-      removeLastMessage: () => {}, // Added removeLastMessage
-      updateConfig: (newConfig: Partial<OpenAIConfig>) => {},
-      submit: () => {},
-      loading: true,
-      error: "",
-      models: [] as OpenAIModel[], // Added models
-      loadingModels: false, // Added loadingModels
-      reasoningTime: 0, // Added reasoningTime
-      timeToFirstToken: 0, // Added timeToFirstToken
-    };
+  systemMessage: {
+    role: "system",
+    content: "You are a helpful AI chatbot.",
+  } as OpenAISystemMessage,
+  messages: [] as OpenAIChatMessage[],
+  config: defaultConfig as OpenAIConfig,
+  updateSystemMessage: (content: string) => {},
+  addMessage: () => {},
+  removeMessage: (id: number) => {},
+  conversationName: "",
+  conversationId: "",
+  deleteConversation: () => {},
+  updateConversationName: () => {},
+  conversations: {} as History,
+  clearConversations: () => {},
+  clearConversation: () => {},
+  loadConversation: (id: string, conversation: Conversation) => {},
+  toggleMessageRole: (id: number) => {},
+  updateMessageContent: (id: number, content: string) => {},
+  removeLastMessage: () => {},
+  updateConfig: (newConfig: Partial<OpenAIConfig>) => {},
+  submit: () => {},
+  loading: true,
+  error: "",
+  models: [] as OpenAIModel[],
+  loadingModels: false,
+};
 
 const OpenAIContext = React.createContext<{
   systemMessage: OpenAISystemMessage;
@@ -72,16 +72,14 @@ const OpenAIContext = React.createContext<{
   clearConversations: () => void;
   loadConversation: (id: string, conversation: Conversation) => void;
   toggleMessageRole: (id: number) => void;
-  updateMessageContent: (id: number, content: string, isReasoning?: boolean, time?: number, usage?: any) => void;
-  removeLastMessage: () => void; // Added removeLastMessage
+  updateMessageContent: (id: number, content: string, type: "reasoning" | "content" | "usage", value?: number | Usage) => void;
+  removeLastMessage: () => void;
   updateConfig: (newConfig: Partial<OpenAIConfig>) => void;
   submit: () => void;
   loading: boolean;
   error: string;
-  models: OpenAIModel[]; // Added models
-  loadingModels: boolean; // Added loadingModels
-  reasoningTime: number; // Added reasoningTime
-  timeToFirstToken: number; // Added timeToFirstToken
+  models: OpenAIModel[];
+  loadingModels: boolean;
 }>(defaultContext);
 
 export default function OpenAIProvider({ children }: PropsWithChildren) {
@@ -102,8 +100,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   );
   const [config, setConfig] = React.useState<OpenAIConfig>(defaultConfig);
   const [messages, setMessages] = React.useState<OpenAIChatMessage[]>([]);
-  const [reasoningTime, setReasoningTime] = React.useState(0); // New state for reasoning time
-  const [timeToFirstToken, setTimeToFirstToken] = React.useState(0); // New state for time to first token
 
   // Load conversation from local storage
   useEffect(() => {
@@ -186,24 +182,39 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         }
       }
     }
-  }, [availableModels, config.model, loadingModels, config.max_tokens]); // Added config.max_tokens to dependencies
+  }, [availableModels, config.model, loadingModels, config.max_tokens]);
 
-
-  const updateMessageContent = (id: number, content: string, isReasoning: boolean = false, time?: number, usage?: any) => {
+  const updateMessageContent = (id: number, content: string, type: "reasoning" | "content" | "usage", value?: number | Usage) => {
     setMessages((prev) => {
       const index = prev.findIndex((message) => message.id === id);
       if (index === -1) return prev;
       const message = prev[index];
+
+      const newMetadata: ResponseMetadata = { ...message.metadata };
+
+      if (type === "reasoning" && typeof value === "number") {
+        newMetadata.reasoningTime = value;
+        newMetadata.isReasoning = true;
+      } else if (type === "usage" && typeof value === "object") {
+        newMetadata.usage = value;
+        newMetadata.totalTime = value.totalTime;
+        newMetadata.tokensPerSecond = value.tokensPerSecond;
+        newMetadata.reasoningTime = newMetadata.reasoningTime ?? value.timeToFirstToken; // If reasoningTime not set by reasoning stream, use timeToFirstToken
+        newMetadata.isReasoning = newMetadata.isReasoning || false; // Ensure isReasoning is set
+      } else if (type === "content") {
+        newMetadata.isReasoning = false; // Content stream means reasoning is over
+      }
+
+      const updatedMessage = {
+        ...message,
+        content: type === "content" ? content : message.content,
+        reasoning: type === "reasoning" ? content : message.reasoning,
+        metadata: newMetadata,
+      };
+
       return [
         ...prev.slice(0, index),
-        {
-          ...message,
-          content: isReasoning ? message.content : content,
-          reasoning: isReasoning ? content : message.reasoning,
-          reasoningTime: time !== undefined ? time : message.reasoningTime, // Update reasoningTime
-          isReasoning: isReasoning || message.isReasoning, // Set isReasoning
-          usage: usage || message.usage, // Update usage
-        },
+        updatedMessage,
         ...prev.slice(index + 1),
       ];
     });
@@ -302,11 +313,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   };
 
   const submit = useCallback(async (messages_: OpenAIChatMessage[] = []) => {
-    console.count("Submit function calls");
-    console.log("Submit function called. Loading state:", loading);
     if (loading) return;
     setLoading(true);
-    setReasoningTime(0); // Reset reasoning time at the start of a new submission
 
     const startTime = Date.now(); // Start timer using Date.now() for consistency
 
@@ -322,7 +330,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         })),
         reasoning: config.reasoning, // Pass reasoning config
       };
-      console.log("Sending request to API with payload:", payload);
 
       const response = await fetch("/api/completion", {
         method: "POST",
@@ -334,7 +341,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       });
 
       const { body, ok } = response;
-      console.log("API response:", response);
 
       if (!body) {
         throw new Error("No response body received from the API");
@@ -357,15 +363,14 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       let buffer = ""; // Buffer to accumulate partial JSON chunks
       let reasoningStartTime: number | null = null; // New: Track reasoning start time
       let reasoningEndTime: number | null = null; // New: Track reasoning end time
-      let finalReasoningTime: number | null = null; // New: Store the calculated reasoning duration
+      let finalReasoningTime: number | null = null;
       
       setMessages((prev) => [...prev, {
         id: messageId,
         role: "assistant",
         content: "",
         reasoning: "",
-        reasoningTime: 0, // Initialize reasoning time for the new message
-        isReasoning: false, // Initialize isReasoning
+        metadata: {}, // Initialize metadata for the new message
       } as OpenAIChatMessage]);
 
       let done = false;
@@ -382,36 +387,27 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
             try {
               const parsedChunk = JSON.parse(line);
               if (parsedChunk.type === "reasoning") {
-                if (reasoningStartTime === null) { // First reasoning chunk
+                if (reasoningStartTime === null) {
                   reasoningStartTime = Date.now();
                 }
                 accumulatedReasoning += parsedChunk.value;
-                const elapsed = (Date.now() - reasoningStartTime) / 1000; // Calculate elapsed time from reasoning start
-                setReasoningTime(elapsed); // Update global reasoning time state for real-time display
-                updateMessageContent(messageId, accumulatedReasoning, true, elapsed); // Update message with elapsed reasoning time
+                const elapsed = (Date.now() - reasoningStartTime) / 1000;
+                updateMessageContent(messageId, accumulatedReasoning, "reasoning", elapsed);
               } else if (parsedChunk.type === "content") {
-                if (reasoningStartTime !== null && reasoningEndTime === null) { // First content chunk after reasoning
-                  reasoningEndTime = Date.now();
-                  finalReasoningTime = (reasoningEndTime - reasoningStartTime) / 1000; // Calculate final reasoning duration
-                  setReasoningTime(finalReasoningTime); // Update global reasoning time state with final duration
-                  // Update the message with the calculated final reasoning time
-                  updateMessageContent(messageId, accumulatedContent, false, finalReasoningTime ?? undefined);
-                }
-                accumulatedContent += parsedChunk.value;
-                updateMessageContent(messageId, accumulatedContent);
-              } else if (parsedChunk.type === "usage") {
-                // If reasoning ended but no content started (e.g., only reasoning response)
                 if (reasoningStartTime !== null && reasoningEndTime === null) {
                   reasoningEndTime = Date.now();
                   finalReasoningTime = (reasoningEndTime - reasoningStartTime) / 1000;
-                  setReasoningTime(finalReasoningTime); // Update global reasoning time state
+                  updateMessageContent(messageId, accumulatedReasoning, "reasoning", finalReasoningTime);
                 }
-                // Pass the calculated finalReasoningTime along with usage
-                updateMessageContent(messageId, accumulatedContent, false, finalReasoningTime ?? undefined, parsedChunk.value);
-                // Update global timeToFirstToken state
-                if (parsedChunk.value.timeToFirstToken !== undefined) {
-                  setTimeToFirstToken(parsedChunk.value.timeToFirstToken);
+                accumulatedContent += parsedChunk.value;
+                updateMessageContent(messageId, accumulatedContent, "content");
+              } else if (parsedChunk.type === "usage") {
+                if (reasoningStartTime !== null && reasoningEndTime === null) {
+                  reasoningEndTime = Date.now();
+                  finalReasoningTime = (reasoningEndTime - reasoningStartTime) / 1000;
+                  updateMessageContent(messageId, accumulatedReasoning, "reasoning", finalReasoningTime);
                 }
+                updateMessageContent(messageId, accumulatedContent, "usage", parsedChunk.value);
               }
             } catch (e) {
               console.error("Error parsing line from stream:", e, line);
@@ -419,11 +415,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           }
         }
       }
-      // Final update for reasoningTime if reasoning occurred but no content or usage chunk followed immediately
       if (reasoningStartTime !== null && finalReasoningTime === null) {
         finalReasoningTime = (Date.now() - reasoningStartTime) / 1000;
-        setReasoningTime(finalReasoningTime); // Update global reasoning time state
-        updateMessageContent(messageId, accumulatedContent, false, finalReasoningTime ?? undefined);
+        updateMessageContent(messageId, accumulatedReasoning, "reasoning", finalReasoningTime);
       }
     } catch (error: any) {
       console.error("Error in submit:", error);
@@ -439,7 +433,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     } finally {
       setLoading(false);
     }
-  }, [config, messages, systemMessage, loading, token]);
+  }, [config, messages, systemMessage, loading, token, updateMessageContent]);
 
   const addMessage = useCallback(
     (
@@ -488,10 +482,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       updateConfig,
       submit,
       error,
-      models: availableModels, // Added models
-      loadingModels, // Added loadingModels
-      reasoningTime, // Added reasoningTime
-      timeToFirstToken, // Added timeToFirstToken
+      models: availableModels,
+      loadingModels,
     }),
     [
       systemMessage,
@@ -504,11 +496,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       conversations,
       clearConversations,
       error,
-      availableModels, // Added to dependency array
-      loadingModels, // Added to dependency array
-      removeLastMessage, // Added to dependency array
-      reasoningTime, // Added to dependency array
-      timeToFirstToken, // Added to dependency array
+      availableModels,
+      loadingModels,
+      removeLastMessage,
     ]
   );
 
