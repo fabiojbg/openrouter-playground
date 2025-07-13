@@ -48,6 +48,7 @@ const defaultContext = {
   error: "",
   models: [] as OpenAIModel[], // Added models
   loadingModels: false, // Added loadingModels
+  reasoningTime: 0, // Added reasoningTime
 };
 
 const OpenAIContext = React.createContext<{
@@ -70,7 +71,7 @@ const OpenAIContext = React.createContext<{
   clearConversations: () => void;
   loadConversation: (id: string, conversation: Conversation) => void;
   toggleMessageRole: (id: number) => void;
-  updateMessageContent: (id: number, content: string) => void;
+  updateMessageContent: (id: number, content: string, isReasoning?: boolean, time?: number) => void;
   removeLastMessage: () => void; // Added removeLastMessage
   updateConfig: (newConfig: Partial<OpenAIConfig>) => void;
   submit: () => void;
@@ -78,6 +79,7 @@ const OpenAIContext = React.createContext<{
   error: string;
   models: OpenAIModel[]; // Added models
   loadingModels: boolean; // Added loadingModels
+  reasoningTime: number; // Added reasoningTime
 }>(defaultContext);
 
 export default function OpenAIProvider({ children }: PropsWithChildren) {
@@ -98,6 +100,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   );
   const [config, setConfig] = React.useState<OpenAIConfig>(defaultConfig);
   const [messages, setMessages] = React.useState<OpenAIChatMessage[]>([]);
+  const [reasoningTime, setReasoningTime] = React.useState(0); // New state for reasoning time
 
   // Load conversation from local storage
   useEffect(() => {
@@ -183,7 +186,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   }, [availableModels, config.model, loadingModels, config.max_tokens]); // Added config.max_tokens to dependencies
 
 
-  const updateMessageContent = (id: number, content: string, isReasoning: boolean = false) => {
+  const updateMessageContent = (id: number, content: string, isReasoning: boolean = false, time?: number) => {
     setMessages((prev) => {
       const index = prev.findIndex((message) => message.id === id);
       if (index === -1) return prev;
@@ -194,6 +197,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           ...message,
           content: isReasoning ? message.content : content,
           reasoning: isReasoning ? content : message.reasoning,
+          reasoningTime: time !== undefined ? time : message.reasoningTime, // Update reasoningTime
+          isReasoning: isReasoning || message.isReasoning, // Set isReasoning
         },
         ...prev.slice(index + 1),
       ];
@@ -297,6 +302,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     console.log("Submit function called. Loading state:", loading);
     if (loading) return;
     setLoading(true);
+    setReasoningTime(0); // Reset reasoning time at the start of a new submission
+
+    const startTime = performance.now(); // Start timer
 
     try {
       const decoder = new TextDecoder();
@@ -349,6 +357,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         role: "assistant",
         content: "",
         reasoning: "",
+        reasoningTime: 0, // Initialize reasoning time for the new message
+        isReasoning: false, // Initialize isReasoning
       } as OpenAIChatMessage]);
 
       let done = false;
@@ -366,7 +376,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
               const parsedChunk = JSON.parse(line);
               if (parsedChunk.type === "reasoning") {
                 accumulatedReasoning += parsedChunk.value;
-                updateMessageContent(messageId, accumulatedReasoning, true);
+                const elapsed = (performance.now() - startTime) / 1000; // Calculate elapsed time in seconds
+                setReasoningTime(elapsed); // Update global reasoning time state
+                updateMessageContent(messageId, accumulatedReasoning, true, elapsed); // Pass elapsed time to message content
               } else if (parsedChunk.type === "content") {
                 accumulatedContent += parsedChunk.value;
                 updateMessageContent(messageId, accumulatedContent);
@@ -444,6 +456,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       error,
       models: availableModels, // Added models
       loadingModels, // Added loadingModels
+      reasoningTime, // Added reasoningTime
     }),
     [
       systemMessage,
@@ -459,6 +472,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       availableModels, // Added to dependency array
       loadingModels, // Added to dependency array
       removeLastMessage, // Added to dependency array
+      reasoningTime, // Added to dependency array
     ]
   );
 

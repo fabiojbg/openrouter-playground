@@ -33,9 +33,11 @@ const syntaxTheme = oneDark;
 type Props = {
   content: string;
   reasoning?: string;
+  reasoningTime?: number; // Added reasoningTime prop
+  isReasoning?: boolean; // Added isReasoning prop
 };
 
-export default function AssistantMessageContent({ content, reasoning, ...props }: Props) {
+export default function AssistantMessageContent({ content, reasoning, reasoningTime, isReasoning, ...props }: Props) {
   const reasoningRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -148,7 +150,12 @@ export default function AssistantMessageContent({ content, reasoning, ...props }
     <>
       {reasoning && (
         <>
-          <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">Reasoning:</p>
+          {isReasoning && reasoningTime !== undefined && (
+            <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">
+              Reasoning: ({reasoningTime.toFixed(1)}s)
+            </p>
+          )}
+          {/* <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">Reasoning:</p> */}
           <div ref={reasoningRef} className="text-sm text-gray-500 dark:text-gray-400 max-h-60 overflow-y-auto">
             <ReactMarkdown
               remarkPlugins={[remarkMath]}

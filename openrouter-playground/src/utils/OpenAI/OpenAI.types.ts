@@ -3,6 +3,8 @@ export interface OpenAIChatMessage { // Removed import for OpenAIChatModels
   role: "system" | "assistant" | "user";
   content: string;
   reasoning?: string; // Added reasoning field
+  reasoningTime?: number; // Added reasoningTime field
+  isReasoning?: boolean; // Added isReasoning field
 }
 
 export interface OpenAISystemMessage {
