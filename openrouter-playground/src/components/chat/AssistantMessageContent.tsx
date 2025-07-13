@@ -115,7 +115,25 @@ export default function AssistantMessageContent({ content, reasoning, reasoningT
               const codeContent = Array.isArray(props.children) 
                 ? props.children.join('') 
                 : props.children;
-              navigator.clipboard.writeText(codeContent);
+              // Check if navigator.clipboard and writeText are available
+              if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(codeContent);
+              } else {
+                // Fallback for environments where clipboard API is not available (e.g., older browsers, non-secure contexts)
+                const textArea = document.createElement('textarea');
+                textArea.value = codeContent;
+                textArea.style.position = 'fixed'; // Avoid scrolling to bottom
+                textArea.style.left = '-9999px'; // Move off-screen
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                  document.execCommand('copy');
+                } catch (err) {
+                  console.error('Fallback: Oops, unable to copy', err);
+                }
+                document.body.removeChild(textArea);
+              }
               // Show copied message
               const copiedMessage = document.createElement('div');
               copiedMessage.textContent = 'Copied to clipboard';
