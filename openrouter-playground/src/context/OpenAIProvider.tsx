@@ -71,7 +71,7 @@ const OpenAIContext = React.createContext<{
   clearConversations: () => void;
   loadConversation: (id: string, conversation: Conversation) => void;
   toggleMessageRole: (id: number) => void;
-  updateMessageContent: (id: number, content: string, isReasoning?: boolean, time?: number) => void;
+  updateMessageContent: (id: number, content: string, isReasoning?: boolean, time?: number, usage?: any) => void;
   removeLastMessage: () => void; // Added removeLastMessage
   updateConfig: (newConfig: Partial<OpenAIConfig>) => void;
   submit: () => void;
@@ -186,7 +186,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   }, [availableModels, config.model, loadingModels, config.max_tokens]); // Added config.max_tokens to dependencies
 
 
-  const updateMessageContent = (id: number, content: string, isReasoning: boolean = false, time?: number) => {
+  const updateMessageContent = (id: number, content: string, isReasoning: boolean = false, time?: number, usage?: any) => {
     setMessages((prev) => {
       const index = prev.findIndex((message) => message.id === id);
       if (index === -1) return prev;
@@ -199,6 +199,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           reasoning: isReasoning ? content : message.reasoning,
           reasoningTime: time !== undefined ? time : message.reasoningTime, // Update reasoningTime
           isReasoning: isReasoning || message.isReasoning, // Set isReasoning
+          usage: usage || message.usage, // Update usage
         },
         ...prev.slice(index + 1),
       ];
@@ -304,7 +305,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     setLoading(true);
     setReasoningTime(0); // Reset reasoning time at the start of a new submission
 
-    const startTime = performance.now(); // Start timer
+    const startTime = Date.now(); // Start timer using Date.now() for consistency
 
     try {
       const decoder = new TextDecoder();
@@ -326,7 +327,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, startTime: startTime }), // Pass startTime to the API route
       });
 
       const { body, ok } = response;
@@ -351,6 +352,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       let accumulatedContent = "";
       let accumulatedReasoning = "";
       let buffer = ""; // Buffer to accumulate partial JSON chunks
+      let reasoningStartTime: number | null = null; // New: Track reasoning start time
+      let reasoningEndTime: number | null = null; // New: Track reasoning end time
+      let finalReasoningTime: number | null = null; // New: Store the calculated reasoning duration
       
       setMessages((prev) => [...prev, {
         id: messageId,
@@ -375,21 +379,44 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
             try {
               const parsedChunk = JSON.parse(line);
               if (parsedChunk.type === "reasoning") {
+                if (reasoningStartTime === null) { // First reasoning chunk
+                  reasoningStartTime = Date.now();
+                }
                 accumulatedReasoning += parsedChunk.value;
-                const elapsed = (performance.now() - startTime) / 1000; // Calculate elapsed time in seconds
-                setReasoningTime(elapsed); // Update global reasoning time state
-                updateMessageContent(messageId, accumulatedReasoning, true, elapsed); // Pass elapsed time to message content
+                const elapsed = (Date.now() - reasoningStartTime) / 1000; // Calculate elapsed time from reasoning start
+                setReasoningTime(elapsed); // Update global reasoning time state for real-time display
+                updateMessageContent(messageId, accumulatedReasoning, true, elapsed); // Update message with elapsed reasoning time
               } else if (parsedChunk.type === "content") {
+                if (reasoningStartTime !== null && reasoningEndTime === null) { // First content chunk after reasoning
+                  reasoningEndTime = Date.now();
+                  finalReasoningTime = (reasoningEndTime - reasoningStartTime) / 1000; // Calculate final reasoning duration
+                  setReasoningTime(finalReasoningTime); // Update global reasoning time state with final duration
+                  // Update the message with the calculated final reasoning time
+                  updateMessageContent(messageId, accumulatedContent, false, finalReasoningTime ?? undefined);
+                }
                 accumulatedContent += parsedChunk.value;
                 updateMessageContent(messageId, accumulatedContent);
+              } else if (parsedChunk.type === "usage") {
+                // If reasoning ended but no content started (e.g., only reasoning response)
+                if (reasoningStartTime !== null && reasoningEndTime === null) {
+                  reasoningEndTime = Date.now();
+                  finalReasoningTime = (reasoningEndTime - reasoningStartTime) / 1000;
+                  setReasoningTime(finalReasoningTime); // Update global reasoning time state
+                }
+                // Pass the calculated finalReasoningTime along with usage
+                updateMessageContent(messageId, accumulatedContent, false, finalReasoningTime ?? undefined, parsedChunk.value);
               }
             } catch (e) {
               console.error("Error parsing line from stream:", e, line);
-              // If a line is not valid JSON, it's likely a malformed chunk or an unexpected message.
-              // For now, we'll just log it and ignore, assuming all valid data will be JSON.
             }
           }
         }
+      }
+      // Final update for reasoningTime if reasoning occurred but no content or usage chunk followed immediately
+      if (reasoningStartTime !== null && finalReasoningTime === null) {
+        finalReasoningTime = (Date.now() - reasoningStartTime) / 1000;
+        setReasoningTime(finalReasoningTime); // Update global reasoning time state
+        updateMessageContent(messageId, accumulatedContent, false, finalReasoningTime ?? undefined);
       }
     } catch (error: any) {
       console.error("Error in submit:", error);

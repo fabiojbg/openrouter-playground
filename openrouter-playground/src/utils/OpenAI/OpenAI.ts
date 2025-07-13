@@ -1,4 +1,4 @@
-import { OpenAIChatMessage, OpenAIConfig, OpenAIRequest } from "./OpenAI.types"; // Added OpenAIRequest
+import { OpenAIChatMessage, OpenAIConfig, OpenAIRequest, Usage } from "./OpenAI.types"; // Added OpenAIRequest, Usage
 import {
   createParser,
   ParsedEvent,
@@ -24,14 +24,18 @@ interface StreamResponse {
     };
     finish_reason?: string;
   }>;
+  usage?: Usage; // Added usage field
 }
 
 export const getOpenAICompletion = async (
   token: string,
-  payload: OpenAIRequest
+  payload: OpenAIRequest,
+  requestStartTime: number // Add requestStartTime parameter
 ) => {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
+
+  const startTime = requestStartTime; // Use the passed startTime
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     headers: {
@@ -41,7 +45,7 @@ export const getOpenAICompletion = async (
       "X-Title": "OpenRouter Playground", // Optional but recommended
     },
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, usage: { include: true } }), // Enable usage accounting
   });
 
   if (!response.ok) {
@@ -67,7 +71,7 @@ export const getOpenAICompletion = async (
           }
 
           try {
-            const json = JSON.parse(data) as StreamResponse;
+            const json = JSON.parse(data) as StreamResponse;            
             const delta = json.choices && json.choices.length > 0 ? json.choices[0]?.delta : {};
             
             if (delta.reasoning) {
@@ -80,10 +84,24 @@ export const getOpenAICompletion = async (
               controller.enqueue(queue);
             }
 
-            // Check if the response is complete
-            if (json.choices[0]?.finish_reason === "stop") {
-              controller.close();
+            // Process usage data if present in any chunk
+            if (json.usage) {
+              const totalTime = (Date.now() - startTime) / 1000; // Total time in seconds
+              let tokensPerSecond = 0;
+              if (json.usage.total_tokens && totalTime > 0) {
+                tokensPerSecond = json.usage.total_tokens / totalTime;
+              }
+
+              const usageData = {
+                ...json.usage,
+                totalTime,
+                tokensPerSecond,
+              };
+              const queue = encoder.encode(JSON.stringify({ type: "usage", value: usageData }) + "\n");
+              controller.enqueue(queue);
             }
+            // The stream will be closed when "[DONE]" is received.
+            // No need to close here based on finish_reason.
           } catch (e) {
             console.error("Error parsing stream:", e);
             controller.error(e);

@@ -17,6 +17,9 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 
 import "katex/dist/katex.min.css"; // `rehype-katex` does not import the CSS for you
+import ResponseStats from './ResponseStats'; // Import ResponseStats
+import { OpenAIChatMessage } from '../../utils/OpenAI/OpenAI.types'; // Import OpenAIChatMessage
+import { useState } from 'react'; // Import useState
 
 SyntaxHighlighter.registerLanguage("tsx", tsx);
 SyntaxHighlighter.registerLanguage("typescript", typescript);
@@ -31,14 +34,13 @@ SyntaxHighlighter.registerLanguage("json", json);
 const syntaxTheme = oneDark;
 
 type Props = {
-  content: string;
-  reasoning?: string;
-  reasoningTime?: number; // Added reasoningTime prop
-  isReasoning?: boolean; // Added isReasoning prop
+  message: OpenAIChatMessage; // Changed to pass the whole message object
 };
 
-export default function AssistantMessageContent({ content, reasoning, reasoningTime, isReasoning, ...props }: Props) {
+export default function AssistantMessageContent({ message, ...props }: Props) {
+  const { content, reasoning, reasoningTime, isReasoning } = message; // Destructure message
   const reasoningRef = useRef<HTMLDivElement>(null);
+  const [showStats, setShowStats] = useState(false); // State for showing stats modal
 
   useEffect(() => {
     if (reasoningRef.current) {
@@ -195,6 +197,21 @@ export default function AssistantMessageContent({ content, reasoning, reasoningT
       >
         {content}
       </ReactMarkdown>
+
+      {message.usage && (
+        <div className="flex justify-end mt-2">
+          <button
+            onClick={() => setShowStats(true)}
+            className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            Show Stats
+          </button>
+        </div>
+      )}
+
+      {showStats && (
+        <ResponseStats message={message} onClose={() => setShowStats(false)} />
+      )}
     </>
   );
 }

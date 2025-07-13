@@ -30,6 +30,7 @@ export default async function handler(req: Request) {
       frequency_penalty,
       presence_penalty,
       messages,
+      startTime, // Capture startTime from the request body
     } = await req.json().catch(() => ({}));
 
     if (!messages || !Array.isArray(messages)) {
@@ -77,7 +78,7 @@ export default async function handler(req: Request) {
       };
 
     try {
-      const stream = await getOpenAICompletion(token, payload);
+      const stream = await getOpenAICompletion(token, payload, startTime); // Pass startTime to the function
       return new Response(stream);
     } catch (e: any) {
       console.error('OpenAI API Error:', e);
