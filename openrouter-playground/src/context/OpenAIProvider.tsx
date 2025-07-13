@@ -22,34 +22,35 @@ import useModels from "@/components/hooks/useModels"; // Added useModels import
 const CHAT_ROUTE = "/";
 
 const defaultContext = {
-  systemMessage: {
-    role: "system",
-    content: "You are a helpful AI chatbot.",
-  } as OpenAISystemMessage,
-  messages: [] as OpenAIChatMessage[],
-  config: defaultConfig as OpenAIConfig,
-  updateSystemMessage: (content: string) => {},
-  addMessage: () => {},
-  removeMessage: (id: number) => {},
-  conversationName: "",
-  conversationId: "",
-  deleteConversation: () => {},
-  updateConversationName: () => {},
-  conversations: {} as History,
-  clearConversations: () => {},
-  clearConversation: () => {},
-  loadConversation: (id: string, conversation: Conversation) => {},
-  toggleMessageRole: (id: number) => {},
-  updateMessageContent: (id: number, content: string) => {},
-  removeLastMessage: () => {}, // Added removeLastMessage
-  updateConfig: (newConfig: Partial<OpenAIConfig>) => {},
-  submit: () => {},
-  loading: true,
-  error: "",
-  models: [] as OpenAIModel[], // Added models
-  loadingModels: false, // Added loadingModels
-  reasoningTime: 0, // Added reasoningTime
-};
+      systemMessage: {
+        role: "system",
+        content: "You are a helpful AI chatbot.",
+      } as OpenAISystemMessage,
+      messages: [] as OpenAIChatMessage[],
+      config: defaultConfig as OpenAIConfig,
+      updateSystemMessage: (content: string) => {},
+      addMessage: () => {},
+      removeMessage: (id: number) => {},
+      conversationName: "",
+      conversationId: "",
+      deleteConversation: () => {},
+      updateConversationName: () => {},
+      conversations: {} as History,
+      clearConversations: () => {},
+      clearConversation: () => {},
+      loadConversation: (id: string, conversation: Conversation) => {},
+      toggleMessageRole: (id: number) => {},
+      updateMessageContent: (id: number, content: string) => {},
+      removeLastMessage: () => {}, // Added removeLastMessage
+      updateConfig: (newConfig: Partial<OpenAIConfig>) => {},
+      submit: () => {},
+      loading: true,
+      error: "",
+      models: [] as OpenAIModel[], // Added models
+      loadingModels: false, // Added loadingModels
+      reasoningTime: 0, // Added reasoningTime
+      timeToFirstToken: 0, // Added timeToFirstToken
+    };
 
 const OpenAIContext = React.createContext<{
   systemMessage: OpenAISystemMessage;
@@ -80,6 +81,7 @@ const OpenAIContext = React.createContext<{
   models: OpenAIModel[]; // Added models
   loadingModels: boolean; // Added loadingModels
   reasoningTime: number; // Added reasoningTime
+  timeToFirstToken: number; // Added timeToFirstToken
 }>(defaultContext);
 
 export default function OpenAIProvider({ children }: PropsWithChildren) {
@@ -101,6 +103,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   const [config, setConfig] = React.useState<OpenAIConfig>(defaultConfig);
   const [messages, setMessages] = React.useState<OpenAIChatMessage[]>([]);
   const [reasoningTime, setReasoningTime] = React.useState(0); // New state for reasoning time
+  const [timeToFirstToken, setTimeToFirstToken] = React.useState(0); // New state for time to first token
 
   // Load conversation from local storage
   useEffect(() => {
@@ -405,6 +408,10 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
                 }
                 // Pass the calculated finalReasoningTime along with usage
                 updateMessageContent(messageId, accumulatedContent, false, finalReasoningTime ?? undefined, parsedChunk.value);
+                // Update global timeToFirstToken state
+                if (parsedChunk.value.timeToFirstToken !== undefined) {
+                  setTimeToFirstToken(parsedChunk.value.timeToFirstToken);
+                }
               }
             } catch (e) {
               console.error("Error parsing line from stream:", e, line);
@@ -484,6 +491,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       models: availableModels, // Added models
       loadingModels, // Added loadingModels
       reasoningTime, // Added reasoningTime
+      timeToFirstToken, // Added timeToFirstToken
     }),
     [
       systemMessage,
@@ -500,6 +508,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       loadingModels, // Added to dependency array
       removeLastMessage, // Added to dependency array
       reasoningTime, // Added to dependency array
+      timeToFirstToken, // Added to dependency array
     ]
   );
 

@@ -20,6 +20,7 @@ export interface Usage {
   total_tokens: number;
   totalTime?: number; // Added totalTime to Usage interface
   tokensPerSecond?: number; // Added tokensPerSecond to Usage interface
+  timeToFirstToken?: number; // Added timeToFirstToken to Usage interface
 }
 
 export interface CompletionTokensDetails {

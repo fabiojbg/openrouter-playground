@@ -36,6 +36,7 @@ export const getOpenAICompletion = async (
   const decoder = new TextDecoder();
 
   const startTime = requestStartTime; // Use the passed startTime
+  let firstTokenTime: number | null = null; // Initialize firstTokenTime
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     headers: {
@@ -73,6 +74,11 @@ export const getOpenAICompletion = async (
           try {
             const json = JSON.parse(data) as StreamResponse;            
             const delta = json.choices && json.choices.length > 0 ? json.choices[0]?.delta : {};
+
+            // Capture first token time
+            if (firstTokenTime === null && (delta.reasoning || delta.content)) {
+              firstTokenTime = Date.now();
+            }
             
             if (delta.reasoning) {
               const queue = encoder.encode(JSON.stringify({ type: "reasoning", value: delta.reasoning }) + "\n");
@@ -92,10 +98,13 @@ export const getOpenAICompletion = async (
                 tokensPerSecond = json.usage.total_tokens / totalTime;
               }
 
+              const timeToFirstToken = firstTokenTime !== null ? (firstTokenTime - startTime) / 1000 : 0; // Time to first token in seconds
+
               const usageData = {
                 ...json.usage,
                 totalTime,
                 tokensPerSecond,
+                timeToFirstToken, // Add timeToFirstToken
               };
               const queue = encoder.encode(JSON.stringify({ type: "usage", value: usageData }) + "\n");
               controller.enqueue(queue);
