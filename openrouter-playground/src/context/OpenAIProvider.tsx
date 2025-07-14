@@ -199,7 +199,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         newMetadata.usage = value;
         newMetadata.totalTime = value.totalTime;
         newMetadata.tokensPerSecond = value.tokensPerSecond;
-        newMetadata.reasoningTime = newMetadata.reasoningTime ?? value.timeToFirstToken; // If reasoningTime not set by reasoning stream, use timeToFirstToken
         newMetadata.isReasoning = newMetadata.isReasoning || false; // Ensure isReasoning is set
       } else if (type === "content") {
         newMetadata.isReasoning = false; // Content stream means reasoning is over
