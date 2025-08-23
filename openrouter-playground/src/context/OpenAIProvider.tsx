@@ -50,6 +50,7 @@ const defaultContext = {
   error: "",
   models: [] as OpenAIModel[],
   loadingModels: false,
+  loadingAuth: true, // New: Add loadingAuth to default context
 };
 
 const OpenAIContext = React.createContext<{
@@ -80,10 +81,11 @@ const OpenAIContext = React.createContext<{
   error: string;
   models: OpenAIModel[];
   loadingModels: boolean;
+  loadingAuth: boolean; // New: Add loadingAuth to context type
 }>(defaultContext);
 
 export default function OpenAIProvider({ children }: PropsWithChildren) {
-  const { token } = useAuth();
+  const { token, loadingAuth } = useAuth(); // Destructure loadingAuth
   const { models: availableModels, loadingModels } = useModels(); // Use the hook
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
@@ -312,7 +314,19 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   };
 
   const submit = useCallback(async (messages_: OpenAIChatMessage[] = []) => {
-    if (loading) return;
+    if (loading || loadingAuth) { // Prevent submission if loading or auth is still loading
+      return;
+    }
+
+    // Clear any previous errors on new submission
+    setError(""); 
+
+    // Check if token is available after auth has finished loading
+    if (!token && !loadingAuth) {
+      setError("API Key not set. Please add your OpenRouter API key in the sidebar.");
+      return;
+    }
+
     setLoading(true);
 
     const startTime = Date.now(); // Start timer using Date.now() for consistency
@@ -483,6 +497,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       error,
       models: availableModels,
       loadingModels,
+      loadingAuth, // New: Add loadingAuth to the context value
     }),
     [
       systemMessage,
@@ -498,6 +513,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       availableModels,
       loadingModels,
       removeLastMessage,
+      loadingAuth, // New: Add loadingAuth to dependencies
     ]
   );
 
