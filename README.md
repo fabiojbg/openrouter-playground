@@ -8,16 +8,16 @@ As a side note, all API keys are encrypted and stored in your browser's local st
 
 ### Mock ChatGPT Environment
 This environment has most of the critical features like conversation history (which is stored locally), prompting, and multiple conversations. This environment is a great way to test out your API key and see how it works!
-![AppSample](openrouter-playground/images/app_sample.png)
+![AppSample](app/images/app_sample.png)
 
 ### Playground Environment
-![PlaygroundSample](openrouter-playground/images/app_playground_sample.png)
+![PlaygroundSample](app/images/app_playground_sample.png)
 
 ## Running Locally
 To run this project locally, you will need to have [Node.js](https://nodejs.org/en/) installed. Once you have Node.js installed, you can clone this repository and run the following commands:
 
 ```bash
-cd openrouter-playground
+cd app
 yarn install
 yarn dev
 ```

@@ -15,8 +15,8 @@ The project is a Next.js application built with TypeScript and styled using Tail
 You must mantain this structure updated in case of any change in it or in file´s responsabilities
 
 ```
-openrouter-playground/             # project root with informative files
-└── openrouter-playground/         # playground root
+/Project_Root_Folder/
+└── app/                           # app root source code
     ├── .eslintrc.json             # ESLint configuration for code linting
     ├── .gitignore                 # Specifies intentionally untracked files for Git
     ├── LICENSE                    # Project's software license

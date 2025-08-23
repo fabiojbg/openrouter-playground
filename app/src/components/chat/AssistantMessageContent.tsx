@@ -15,6 +15,7 @@ import json from "react-syntax-highlighter/dist/cjs/languages/prism/json";
 import MathJax from "react-mathjax";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
 
 import "katex/dist/katex.min.css"; // `rehype-katex` does not import the CSS for you
 import ResponseStats from './ResponseStats'; // Import ResponseStats
@@ -179,7 +180,7 @@ export default function AssistantMessageContent({ message, ...props }: Props) {
             <p className="font-bold text-sm text-gray-500 dark:text-gray-400 mb-0 mt-3">Reasoning:</p> )}            
           <div ref={reasoningRef} className="text-sm text-gray-500 dark:text-gray-400 max-h-60 overflow-y-auto">
             <ReactMarkdown
-              remarkPlugins={[remarkMath]}
+              remarkPlugins={[remarkMath, remarkGfm]}
               rehypePlugins={[rehypeKatex]}
               components={MarkdownComponents}
               {...props}
@@ -190,7 +191,7 @@ export default function AssistantMessageContent({ message, ...props }: Props) {
         </>
       )}
       <ReactMarkdown
-        remarkPlugins={[remarkMath]}
+        remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
         components={MarkdownComponents}
         {...props}
