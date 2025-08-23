@@ -9,7 +9,7 @@ import { OpenAIError } from "./OpenAI.errors";
 import { createStreamProcessor } from "./OpenAI.stream";
 
 export const defaultConfig = {
-  model: "deepseek/deepseek-r1:free",
+  model: "deepseek/deepseek-chat-v3-0324:free",
   temperature: 0.5,
   max_tokens: 8192,
   top_p: 1,
