@@ -6,14 +6,17 @@ import { useAuth } from "@/context/AuthProvider";
   Simple hook to fetch models from the API
 */
 export default function useModels() {
-  const { token } = useAuth();
+  const { token, loadingAuth } = useAuth();
   const [models, setModels] = React.useState<OpenAIModel[]>([]);
   const [loadingModels, setLoadingModels] = React.useState(false);
 
   React.useEffect(() => {
-    if (!token) {
-      setModels([]); // Set to empty array if no token
-      setLoadingModels(false); // Ensure loading is false
+    if (loadingAuth) { // Wait for auth to finish loading
+      return;
+    }
+    if (!token) { // If auth is loaded and no token, clear models and stop loading
+      setModels([]);
+      setLoadingModels(false);
       return;
     }
 

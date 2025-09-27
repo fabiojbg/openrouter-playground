@@ -320,9 +320,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
     // Clear any previous errors on new submission
     setError(""); 
-
-    // Check if token is available after auth has finished loading
-    if (!token && !loadingAuth) {
+    
+    // Check if token is available only after authentication has finished loading
+    if (!loadingAuth && !token) {
       setError("API Key not set. Please add your OpenRouter API key in the sidebar.");
       return;
     }
