@@ -9,6 +9,7 @@ import {
 } from "react-icons/md";
 import { Conversation as ConversationI } from "@/utils/History";
 import { useOpenAI } from "@/context/OpenAIProvider";
+import { truncateText } from "@/utils/utils";
 
 type Props = {
   id: string;
@@ -20,9 +21,10 @@ export default function Conversation({ id, conversation, active }: Props) {
   const { updateConversationName, deleteConversation } = useOpenAI();
 
   const [editing, setEditing] = React.useState(false);
-  const [name, setName] = React.useState(
-    conversation.name || conversation.messages[0].content
-  );
+  const fullConversationName = conversation.name || conversation.messages[0].content;
+  const displayText = truncateText(fullConversationName, 500);
+
+  const [name, setName] = React.useState(fullConversationName);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -34,7 +36,7 @@ export default function Conversation({ id, conversation, active }: Props) {
   };
 
   const handleNameCancel = () => {
-    setName(conversation.name || conversation.messages[0].content);
+    setName(fullConversationName);
     setEditing(false);
   };
 
@@ -71,7 +73,7 @@ export default function Conversation({ id, conversation, active }: Props) {
             value={name}
           />
         ) : (
-          conversation.name || conversation.messages[0].content
+          displayText
         )}
         <div
           className={`absolute bottom-0  right-0 z-10 h-full w-24 bg-gradient-to-r from-transparent ${

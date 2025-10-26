@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { MdAdd, MdDeleteOutline, MdBuild } from "react-icons/md";
 import { useOpenAI } from "@/context/OpenAIProvider";
 // Removed: import { OpenAIChatModels } from "@/utils/OpenAI";
@@ -14,6 +14,7 @@ type Props = {};
 
 export default function ChatSidebar({}: Props) {
   const { clearConversations, config, models, loadingModels } = useOpenAI();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const currentModelDetails = React.useMemo(() => {
     if (!config?.model || models.length === 0) return null;
@@ -39,8 +40,15 @@ export default function ChatSidebar({}: Props) {
           <MdAdd />
           New chat
         </Link>
+        <input
+          type="text"
+          placeholder="Search chats..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="my-2 rounded border border-white/20 bg-transparent p-2 text-primary placeholder:text-gray-400 focus:border-white/40 focus:outline-none"
+        />
 
-        <Conversations />
+        <Conversations searchTerm={searchTerm} />
 
         <div className="flex flex-col gap-y-2 border-y border-white/10 py-2 model-panel" >
           <div className="flex flex-col border-b border-white/10 gap-y-2">
