@@ -64,7 +64,10 @@ export default function Conversation({ id, conversation, active }: Props) {
       <span>
         <MdChatBubbleOutline />
       </span>
-      <div className="relative flex grow truncate text-clip">
+      <div
+        className="relative flex grow truncate text-clip"
+        title={!editing ? fullConversationName : undefined}
+      >
         {editing ? (
           <input
             type="text"
