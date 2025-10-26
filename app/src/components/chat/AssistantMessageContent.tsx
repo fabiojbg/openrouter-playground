@@ -200,13 +200,16 @@ export default function AssistantMessageContent({ message, ...props }: Props) {
       </ReactMarkdown>
 
       {metadata?.usage && (
-        <div className="flex justify-end mt-2">
+        <div className="flex flex-col items-end mt-2">
           <button
             onClick={() => setShowStats(true)}
             className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           >
             Show Stats
           </button>
+          <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Tokens: {metadata.usage.total_tokens || 'N/A'} | Cost: ${metadata.usage.cost?.toFixed(6) || 'N/A'}
+          </div>
         </div>
       )}
 
