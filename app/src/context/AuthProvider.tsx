@@ -1,5 +1,4 @@
 import React, { PropsWithChildren } from "react";
-import secureLocalStorage from "react-secure-storage";
 
 const defaultContext = {
   token: "",
@@ -25,12 +24,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     // and if secureLocalStorage ever becomes asynchronous or more complex.
     const loadToken = () => {
       try {
-        const storedToken = secureLocalStorage.getItem("open-ai-token") as string;
+        const storedToken = localStorage.getItem("open-ai-token") as string;
         if (storedToken) {
           setToken(storedToken);
         }
       } catch (error) {
-        console.error("Error loading token from secure storage:", error);
+        console.error("Error loading token from local storage:", error);
       } finally {
         setLoadingAuth(false);
       }
@@ -40,12 +39,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const addToken = (token: string) => {
     setToken(token);
-    secureLocalStorage.setItem("open-ai-token", token);
+    localStorage.setItem("open-ai-token", token);
   };
 
   const clearToken = () => {
     setToken("");
-    secureLocalStorage.removeItem("open-ai-token");
+    localStorage.removeItem("open-ai-token");
   };
 
   const value = React.useMemo(() => ({ token, addToken, clearToken, loadingAuth }), [token, loadingAuth]);
