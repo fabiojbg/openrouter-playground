@@ -86,11 +86,7 @@ export default function ChatSidebar({}: Props) {
 
           <ThemeButton />
         </div>
-
-        <Github />
-        <span className="text-center text-primary/80 text-sm mt-2">
-          Customized by Fabio Botelho
-        </span>
+        <Github /> 
       </div>
     </div>
   );

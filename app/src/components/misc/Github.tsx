@@ -7,10 +7,13 @@ type Props = {};
 export default function Github({}: Props) {
   return (
     <Link
-      className="flex flex-col items-center border-white/10 py-2 text-primary/80 transition-colors hover:text-primary"
-      href="https://github.com/fabiojbg/gpts-playground/tree/main/openrouter-playground"
+      className="flex flex-row items-center border-white/10 py-2 px-2 ml-2 text-primary/80 transition-colors hover:text-primary"
+      href="https://github.com/fabiojbg/openrouter-playground"
     >
       <BsGithub className="text-3xl" />
+      <span className="text-center text-primary/80 text-sm mt-0 ml-2">
+          Customized by Fabio Botelho
+        </span>
     </Link>
   );
 }
