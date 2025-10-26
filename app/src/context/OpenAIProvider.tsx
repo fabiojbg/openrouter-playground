@@ -248,9 +248,13 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
     const { systemMessage, messages, config, name } = conversation;
 
+    // Destructure to isolate isOnline (web search state) from the conversation config.
+    // This maintains the user's current configuration preference across conversation loading.
+    const { isOnline: _, ...restConfig } = config; 
+
     setSystemMessage(systemMessage);
     setMessages(messages);
-    updateConfig(config);
+    updateConfig(restConfig);
     setConversationName(name);
   };
 
