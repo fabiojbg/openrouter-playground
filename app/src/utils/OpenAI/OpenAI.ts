@@ -15,6 +15,7 @@ export const defaultConfig = {
   top_p: 1,
   frequency_penalty: 0,
   presence_penalty: 0.6,
+  isOnline: false,
 };
 
 // Removed local OpenAIRequest type definition

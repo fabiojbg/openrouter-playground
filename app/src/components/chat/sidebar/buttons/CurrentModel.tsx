@@ -1,6 +1,7 @@
 import React from "react";
 import { useOpenAI } from "@/context/OpenAIProvider";
 import Dropdown from "./../../../input/Dropdown";
+import Switch from "./../../../input/Switch";
 import useModels from "./../../../hooks/useModels";
 import { OpenAIConfig } from '@/utils/OpenAI';
 
@@ -32,6 +33,15 @@ export default function CurrentModel({}: Props) {
         value={config.model}
         onSelect={(option) => handleUpdateConfig("model", option)}
       />
+
+      {/* Wrapping div to apply context sensitive padding and margin */}
+      <div className="mt-2 pl-1">
+        <Switch
+          label="Enable Web Search (:online)"
+          checked={!!config.isOnline}
+          onChange={(checked) => updateConfig({ isOnline: checked })}
+        />
+      </div>
     </div>
   );
 }

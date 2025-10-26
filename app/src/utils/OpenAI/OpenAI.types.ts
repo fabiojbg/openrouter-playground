@@ -68,6 +68,7 @@ export interface OpenAIConfig {
   presence_penalty?: number;
   stream?: boolean;
   n?: number;
+  isOnline?: boolean;
 }
 
 export type OpenAIRequest = OpenAIConfig & {

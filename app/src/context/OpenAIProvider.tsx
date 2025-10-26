@@ -335,8 +335,14 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       const decoder = new TextDecoder();
       messages_ = messages_.length ? messages_ : messages;
 
+      let model = config.model;
+      if (config.isOnline) {
+        model += ":online";
+      }
+
       const payload = {
         ...config,
+        model, // Use potentially modified model
         messages: [systemMessage, ...messages_].map(({ role, content }) => ({
           role,
           content,
