@@ -5,12 +5,13 @@ import { MdAddCircleOutline } from "react-icons/md";
 type Props = {};
 
 export default function AddMessage({}: Props) {
-  const { addMessage } = useOpenAI();
+  const { addMessage, loading } = useOpenAI();
 
   return (
     <button
-      className="flex cursor-pointer flex-row gap-x-4 p-4 text-gray-700 hover:bg-gray-100"
+      className="flex cursor-pointer flex-row gap-x-4 p-4 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
       onClick={() => addMessage("", false, "user")}
+      disabled={loading}
     >
       <MdAddCircleOutline size={24} />
       <span className="font-medium">Add Message</span>

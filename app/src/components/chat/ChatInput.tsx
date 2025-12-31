@@ -7,7 +7,6 @@ type Props = {};
 export default function ChatInput({}: Props) {
   const { addMessage, loading, messages, removeLastMessage, loadingAuth, loadingModels } = useOpenAI(); // Destructure loadingAuth and loadingModels
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
-  const isSubmittingRef = React.useRef(false); // New: Local flag to prevent double submission
 
   const [input, setInput] = React.useState("");
 
@@ -15,24 +14,22 @@ export default function ChatInput({}: Props) {
     setInput(e.target.value);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Always prevent default first
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
 
-    if (loading || isSubmittingRef.current) {
-      // If already loading (globally) or locally submitting, ignore this call
+    if (loading || !input.trim()) {
       return;
     }
 
-    isSubmittingRef.current = true; // Set local flag to true
     addMessage(input, true, "user");
     setInput("");
+  };
 
-    // Reset the local flag after a short delay.
-    // This allows the global `loading` state from `useOpenAI` to catch up
-    // and correctly manage subsequent submission attempts.
-    setTimeout(() => {
-      isSubmittingRef.current = false;
-    }, 500); // Adjust delay if needed, 500ms is a reasonable starting point
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
   };
 
   React.useEffect(() => {
@@ -46,24 +43,6 @@ export default function ChatInput({}: Props) {
     resize();
   }, [input]);
 
-  // Handle submitting with enter
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        // Pass a synthetic event or null, as the actual event object from keydown
-        // is not fully compatible with React.FormEvent<HTMLFormElement>
-        // when called from handleSubmit directly. The `e.preventDefault()` is handled above.
-        handleSubmit(e as any); // The `e as any` is necessary here due to type mismatch
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleSubmit]); // handleSubmit is a dependency and will recreate, detaching/attaching listener each time
 
   return (
     <div className="fixed bottom-0 flex h-40 w-full bg-gradient-to-t from-[rgb(var(--bg-secondary))] to-transparent md:w-[calc(100%-260px)]">
@@ -76,6 +55,7 @@ export default function ChatInput({}: Props) {
             ref={textAreaRef}
             className="max-h-[200px] w-full resize-none border-none bg-tertiary p-4 text-primary outline-none"
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             value={input}
             rows={1}
             disabled={loading || loadingAuth || loadingModels} // Disable if loading, auth is loading, or models are loading

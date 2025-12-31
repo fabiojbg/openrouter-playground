@@ -89,6 +89,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   const { models: availableModels, loadingModels } = useModels(); // Use the hook
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
+  const isSubmittingRef = React.useRef(false);
   const [error, setError] = React.useState("");
 
   // Conversation state
@@ -102,6 +103,12 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   );
   const [config, setConfig] = React.useState<OpenAIConfig>(defaultConfig);
   const [messages, setMessages] = React.useState<OpenAIChatMessage[]>([]);
+  const messagesRef = React.useRef<OpenAIChatMessage[]>([]);
+
+  // Update messagesRef whenever messages state changes
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Load conversation from local storage
   useEffect(() => {
@@ -318,10 +325,11 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   };
 
   const submit = useCallback(async (messages_: OpenAIChatMessage[] = []) => {
-    if (loading || loadingAuth) { // Prevent submission if loading or auth is still loading
+    if (loading || loadingAuth || isSubmittingRef.current) { // Prevent submission if loading, auth is still loading, or already submitting
       return;
     }
 
+    isSubmittingRef.current = true;
     // Clear any previous errors on new submission
     setError(""); 
     
@@ -455,6 +463,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       setError(error.message || "An error occurred while processing your request");
     } finally {
       setLoading(false);
+      isSubmittingRef.current = false;
     }
   }, [config, messages, systemMessage, loading, token, updateMessageContent]);
 
@@ -464,22 +473,20 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       submit_: boolean = false,
       role: "user" | "assistant" = "user"
     ) => {
-      setMessages((prev) => {
-        // Generate a unique timestamp-based ID
-        const uniqueId = Date.now() + prev.length;
-        const messages = [
-          ...prev,
-          {
-            id: uniqueId,
-            role,
-            content: content || "",
-          } as OpenAIChatMessage,
-        ];
-        submit_ && submit(messages);
-        return messages;
-      });
+      const newMessage = {
+        id: Date.now(),
+        role,
+        content: content || "",
+      } as OpenAIChatMessage;
+
+      const nextMessages = [...messagesRef.current, newMessage];
+      setMessages(nextMessages);
+
+      if (submit_) {
+        submit(nextMessages);
+      }
     },
-    [submit]
+    [submit] // messagesRef doesn't need to be in dependencies
   );
 
   const value = React.useMemo(
