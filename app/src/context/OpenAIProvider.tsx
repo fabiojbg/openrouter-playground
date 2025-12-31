@@ -46,6 +46,7 @@ const defaultContext = {
   removeLastMessage: () => {},
   updateConfig: (newConfig: Partial<OpenAIConfig>) => {},
   submit: () => {},
+  retry: () => {},
   loading: true,
   error: "",
   models: [] as OpenAIModel[],
@@ -77,6 +78,7 @@ const OpenAIContext = React.createContext<{
   removeLastMessage: () => void;
   updateConfig: (newConfig: Partial<OpenAIConfig>) => void;
   submit: () => void;
+  retry: () => void;
   loading: boolean;
   error: string;
   models: OpenAIModel[];
@@ -467,6 +469,20 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     }
   }, [config, messages, systemMessage, loading, token, updateMessageContent]);
 
+  const retry = useCallback(() => {
+    if (messagesRef.current.length === 0) return;
+    
+    const newMessages = [...messagesRef.current];
+    if (newMessages[newMessages.length - 1].role === "assistant") {
+      newMessages.pop();
+    }
+    
+    if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === "user") {
+      setMessages(newMessages);
+      submit(newMessages);
+    }
+  }, [submit]);
+
   const addMessage = useCallback(
     (
       content: string = "",
@@ -511,6 +527,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       removeLastMessage, // Added removeLastMessage
       updateConfig,
       submit,
+      retry,
       error,
       models: availableModels,
       loadingModels,
@@ -530,6 +547,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       availableModels,
       loadingModels,
       removeLastMessage,
+      retry,
       loadingAuth, // New: Add loadingAuth to dependencies
     ]
   );

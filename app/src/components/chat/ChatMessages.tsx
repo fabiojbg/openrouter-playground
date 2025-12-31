@@ -76,8 +76,12 @@ export default function ChatMessages({}: Props) {
           <ChatPlaceholder />
         ) : (
           <>
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+            {messages.map((message, index) => (
+              <ChatMessage
+                key={message.id}
+                message={message}
+                isLast={index === messages.length - 1}
+              />
             ))}
             <hr className="border-b border-stone-400/20" />
           </>

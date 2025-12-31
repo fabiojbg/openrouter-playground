@@ -77,8 +77,12 @@ export default function PlaygroundMessages({}: Props) {
         className="my-4 flex flex-col items-stretch overflow-y-auto px-4"
         ref={messageContainer}
       >
-        {messages.map((message) => (
-          <PlaygroundMessage key={message.id} message={message} />
+        {messages.map((message, index) => (
+          <PlaygroundMessage
+            key={message.id}
+            message={message}
+            isLast={index === messages.length - 1}
+          />
         ))}
         <AddMessage />
       </div>

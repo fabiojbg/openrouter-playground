@@ -7,15 +7,16 @@ import AssistantMessageContent from "../chat/AssistantMessageContent";
 
 type Props = {
   message: OpenAIChatMessage;
+  isLast: boolean;
 };
 
-export default function PlaygroundMessage({ message }: Props) {
+export default function PlaygroundMessage({ message, isLast }: Props) {
   const { id, role, content, reasoning } = message;
   const { showConversations } = usePlayground();
   const [focus, setFocus] = React.useState(false);
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
-  const { updateMessageContent, removeMessage, toggleMessageRole } =
+  const { updateMessageContent, removeMessage, toggleMessageRole, retry, loading } =
     useOpenAI();
 
   const { submit } = useOpenAI(); // Add this line to get the submit function
@@ -85,7 +86,20 @@ export default function PlaygroundMessage({ message }: Props) {
       </div>
       <div className="basis-8/12 items-center">
         {role === "assistant" ? (
-          <AssistantMessageContent message={message} />
+          <>
+            <AssistantMessageContent message={message} />
+            {isLast && !loading && (
+              <div className="mt-2">
+                <button
+                  onClick={retry}
+                  className="flex flex-row items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                  title="Retry"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <textarea
             className="text-md w-full resize-none rounded bg-transparent p-4 text-gray-700 focus:border-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"
