@@ -38,19 +38,8 @@ export default function ChatMessage({ message, isLast }: Props) {
             ) : (
               <AssistantMessageContent
                 message={message} // Pass the entire message object
+                isLast={isLast}
               />
-            )}
-            {isLast && role === "assistant" && !loading && (
-              <div className="mt-4 flex flex-row items-center justify-start gap-2">
-                <button
-                  onClick={retry}
-                  className="flex flex-row items-center gap-2 rounded-md border border-stone-400/20 bg-secondary px-3 py-1 text-sm text-primary transition-colors hover:bg-tertiary"
-                  title="Retry"
-                >
-                  <MdRefresh className="text-lg" />
-                  Retry
-                </button>
-              </div>
             )}
           </div>
         </div>

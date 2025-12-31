@@ -86,20 +86,7 @@ export default function PlaygroundMessage({ message, isLast }: Props) {
       </div>
       <div className="basis-8/12 items-center">
         {role === "assistant" ? (
-          <>
-            <AssistantMessageContent message={message} />
-            {isLast && !loading && (
-              <div className="mt-2">
-                <button
-                  onClick={retry}
-                  className="flex flex-row items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-50"
-                  title="Retry"
-                >
-                  Retry
-                </button>
-              </div>
-            )}
-          </>
+          <AssistantMessageContent message={message} isLast={isLast} />
         ) : (
           <textarea
             className="text-md w-full resize-none rounded bg-transparent p-4 text-gray-700 focus:border-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"
