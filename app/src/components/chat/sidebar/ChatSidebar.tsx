@@ -9,13 +9,14 @@ import ButtonContainer from "./buttons/ButtonContainer";
 import Conversations from "./conversation/Conversations";
 import ApiKey from "./buttons/ApiKey";
 import CurrentModel from './buttons/CurrentModel';
+import Slider from "../../input/Slider";
 
 type Props = {
   width?: number;
 };
 
 export default function ChatSidebar({ width }: Props) {
-  const { clearConversations, config, models, loadingModels } = useOpenAI();
+  const { clearConversations, config, models, loadingModels, chatWidth, updateChatWidth } = useOpenAI();
   const [searchTerm, setSearchTerm] = useState("");
 
   const currentModelDetails = React.useMemo(() => {
@@ -55,7 +56,7 @@ export default function ChatSidebar({ width }: Props) {
         <Conversations searchTerm={searchTerm} />
 
         <div className="flex flex-col gap-y-2 border-y border-white/10 py-2 model-panel" >
-          <div className="flex flex-col border-b border-white/10 gap-y-2">
+          <div className="flex flex-col border-b border-white/10 gap-y-1">
             <CurrentModel />
             <div className="text-sm text-gray-300 space-y-1 px-4 pb-2">
               {loadingModels ? (
@@ -75,6 +76,15 @@ export default function ChatSidebar({ width }: Props) {
               )}
             </div>
             <ApiKey />
+          </div>
+          <div className="px-4 py-0 border-b border-white/10">
+            <Slider
+              label="Chat Width"
+              range={[40, 90]}
+              step={1}
+              value={chatWidth}
+              onChange={updateChatWidth}
+            />
           </div>
           <Link
             className="flex items-center gap-3 rounded p-3 transition-colors hover:bg-gray-500/10"

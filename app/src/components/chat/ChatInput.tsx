@@ -5,7 +5,7 @@ import { MdSend, MdUndo } from "react-icons/md"; // Added MdUndo
 type Props = {};
 
 export default function ChatInput({}: Props) {
-  const { addMessage, loading, messages, removeLastMessage, loadingAuth, loadingModels } = useOpenAI(); // Destructure loadingAuth and loadingModels
+  const { addMessage, loading, messages, removeLastMessage, loadingAuth, loadingModels, chatWidth } = useOpenAI(); // Destructure loadingAuth and loadingModels
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const [input, setInput] = React.useState("");
@@ -47,7 +47,8 @@ export default function ChatInput({}: Props) {
   return (
     <div className="fixed bottom-0 flex h-40 w-full bg-gradient-to-t from-[rgb(var(--bg-secondary))] to-transparent md:w-[calc(100%-260px)]">
       <form
-        className="mx-auto flex h-full w-full max-w-4xl items-end justify-center p-4 pb-10"
+        className="mx-auto flex h-full w-full items-end justify-center p-4 pb-10"
+        style={{ maxWidth: `${chatWidth}%` }}
         onSubmit={handleSubmit}
       >
         <div className="relative flex w-full flex-row rounded border border-stone-500/20 bg-tertiary shadow-xl">

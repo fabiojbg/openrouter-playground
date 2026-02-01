@@ -44,6 +44,8 @@ const defaultContext = {
   toggleMessageRole: (id: number) => {},
   updateMessageContent: (id: number, content: string) => {},
   removeLastMessage: () => {},
+  chatWidth: 60,
+  updateChatWidth: (width: number) => {},
   updateConfig: (newConfig: Partial<OpenAIConfig>) => {},
   submit: () => {},
   retry: () => {},
@@ -76,6 +78,8 @@ const OpenAIContext = React.createContext<{
   toggleMessageRole: (id: number) => void;
   updateMessageContent: (id: number, content: string, type: "reasoning" | "content" | "usage", value?: number | Usage) => void;
   removeLastMessage: () => void;
+  chatWidth: number;
+  updateChatWidth: (width: number) => void;
   updateConfig: (newConfig: Partial<OpenAIConfig>) => void;
   submit: () => void;
   retry: () => void;
@@ -106,6 +110,21 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   const [config, setConfig] = React.useState<OpenAIConfig>(defaultConfig);
   const [messages, setMessages] = React.useState<OpenAIChatMessage[]>([]);
   const messagesRef = React.useRef<OpenAIChatMessage[]>([]);
+
+  const [chatWidth, setChatWidth] = React.useState<number>(80);
+
+  // Load chat width from local storage
+  useEffect(() => {
+    const storedWidth = localStorage.getItem("chat-width");
+    if (storedWidth) {
+      setChatWidth(parseInt(storedWidth));
+    }
+  }, []);
+
+  const updateChatWidth = (width: number) => {
+    setChatWidth(width);
+    localStorage.setItem("chat-width", width.toString());
+  };
 
   // Update messagesRef whenever messages state changes
   useEffect(() => {
@@ -525,6 +544,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       toggleMessageRole,
       updateMessageContent,
       removeLastMessage, // Added removeLastMessage
+      chatWidth,
+      updateChatWidth,
       updateConfig,
       submit,
       retry,
@@ -547,6 +568,8 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       availableModels,
       loadingModels,
       removeLastMessage,
+      chatWidth,
+      updateChatWidth,
       retry,
       loadingAuth, // New: Add loadingAuth to dependencies
     ]
