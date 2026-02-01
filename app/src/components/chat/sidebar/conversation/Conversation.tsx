@@ -66,7 +66,7 @@ export default function Conversation({ id, conversation, active }: Props) {
       </span>
       <div
         className="relative flex grow truncate text-clip"
-        title={!editing ? fullConversationName : undefined}
+        title={!editing ? displayText : undefined}
       >
         {editing ? (
           <input
