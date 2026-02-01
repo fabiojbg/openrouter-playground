@@ -67,7 +67,7 @@ export default function ChatMessages({}: Props) {
   }, [submit]);
 
   return (
-    <div className="flex h-full w-full flex-col items-stretch md:pl-[260px]">
+    <div className="flex h-full w-full flex-col items-stretch">
       <div
         className="relative flex flex-1 flex-col items-stretch overflow-auto border-b bg-tertiary pb-[10rem] scrollbar scrollbar-w-3 scrollbar-thumb-[rgb(var(--bg-primary))] scrollbar-track-[rgb(var(--bg-secondary))] scrollbar-thumb-rounded-full"
         ref={messageContainer}
