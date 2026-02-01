@@ -45,7 +45,7 @@ export default function ChatInput({}: Props) {
 
 
   return (
-    <div className="fixed bottom-0 flex h-40 w-full bg-gradient-to-t from-[rgb(var(--bg-secondary))] to-transparent md:w-[calc(100%-260px)]">
+    <div className="fixed bottom-0 flex h-40 w-full bg-gradient-to-t from-[rgb(var(--bg-secondary))] to-transparent md:w-[calc(100%-350px)]">
       <form
         className="mx-auto flex h-full w-full items-end justify-center p-4 pb-10"
         style={{ maxWidth: `${chatWidth}%` }}
