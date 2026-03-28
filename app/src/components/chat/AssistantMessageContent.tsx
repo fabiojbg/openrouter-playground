@@ -22,7 +22,7 @@ import ResponseStats from './ResponseStats'; // Import ResponseStats
 import { OpenAIChatMessage } from '../../utils/OpenAI/OpenAI.types'; // Import OpenAIChatMessage
 import { useState } from 'react'; // Import useState
 import { useOpenAI } from "@/context/OpenAIProvider";
-import { MdRefresh } from "react-icons/md";
+import { MdRefresh, MdFileDownload } from "react-icons/md";
 
 SyntaxHighlighter.registerLanguage("tsx", tsx);
 SyntaxHighlighter.registerLanguage("typescript", typescript);
@@ -46,6 +46,21 @@ export default function AssistantMessageContent({ message, isLast, ...props }: P
   const reasoningRef = useRef<HTMLDivElement>(null);
   const [showStats, setShowStats] = useState(false);
   const { retry, loading } = useOpenAI();
+
+  const handleExport = () => {
+    const markdownContent = reasoning
+      ? `### Reasoning\n\n${reasoning}\n\n### Response\n\n${content}`
+      : content;
+    const blob = new Blob([markdownContent], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `response-${new Date().getTime()}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     if (reasoningRef.current) {
@@ -205,6 +220,14 @@ export default function AssistantMessageContent({ message, isLast, ...props }: P
 
       <div className="mt-2 flex flex-col items-end gap-2">
         <div className="flex flex-row items-center gap-2">
+          <button
+            onClick={handleExport}
+            className="flex flex-row items-center gap-2 px-3 py-1 text-sm bg-stone-500 text-white rounded-md hover:bg-stone-600 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:ring-opacity-50 transition-colors"
+            title="Export as Markdown"
+          >
+            <MdFileDownload className="text-lg" />
+            Download as Markdown
+          </button>
           {metadata?.usage && (
             <button
               onClick={() => setShowStats(true)}
