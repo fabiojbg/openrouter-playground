@@ -37,7 +37,7 @@ export default function CurrentModel({}: Props) {
       {/* Wrapping div to apply context sensitive padding and margin */}
       <div className="mt-2 pl-1">
         <Switch
-          label="Enable Web Search (:online)"
+          label="Enable Model Web Search"
           checked={!!config.isOnline}
           onChange={(checked) => updateConfig({ isOnline: checked })}
         />

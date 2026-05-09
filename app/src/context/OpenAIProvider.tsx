@@ -14,6 +14,7 @@ import {
   OpenAIModel,
   ResponseMetadata,
   Usage,
+  OpenAITool,
 } from "@/utils/OpenAI/OpenAI.types";
 import { defaultConfig } from "@/utils/OpenAI/OpenAI";
 import React, { PropsWithChildren, useCallback, useEffect } from "react";
@@ -369,8 +370,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       messages_ = messages_.length ? messages_ : messages;
 
       let model = config.model;
+      let tools: OpenAITool[] | undefined = undefined;
       if (config.isOnline) {
-        model += ":online";
+        tools = [{ type: "openrouter:web_search" }];
       }
 
       const payload = {
@@ -381,6 +383,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           content,
         })),
         reasoning: config.reasoning, // Pass reasoning config
+        tools,
       };
 
       const response = await fetch("/api/completion", {

@@ -9,7 +9,7 @@ import { OpenAIError } from "./OpenAI.errors";
 import { createStreamProcessor } from "./OpenAI.stream";
 
 export const defaultConfig = {
-  model: "openai/gpt-4.1-mini",
+  model: "openai/gpt-5.4-mini",
   temperature: 0.5,
   max_tokens: 8192,
   top_p: 1,

@@ -71,8 +71,15 @@ export interface OpenAIConfig {
   isOnline?: boolean;
 }
 
+export interface OpenAITool {
+  type: string;
+  parameters?: Record<string, any>;
+}
+
 export type OpenAIRequest = OpenAIConfig & {
   messages: OpenAIChatMessage[];
+  tools?: OpenAITool[];
+  tool_choice?: "none" | "auto" | "required" | { type: "function"; function: { name: string } };
 };
 
 export interface OpenAIModel {

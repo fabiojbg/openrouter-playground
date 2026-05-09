@@ -30,6 +30,8 @@ export default async function handler(req: Request) {
       frequency_penalty,
       presence_penalty,
       messages,
+      tools,
+      tool_choice,
       startTime, // Capture startTime from the request body
     } = await req.json().catch(() => ({}));
 
@@ -69,12 +71,16 @@ export default async function handler(req: Request) {
         model,
         messages: processedMessages,
         max_completion_tokens: config.max_tokens,
+        tools,
+        tool_choice,
         stream: true,
         n: 1
       }
     : {
         ...config,
-        messages: processedMessages
+        messages: processedMessages,
+        tools,
+        tool_choice,
       };
 
     try {
