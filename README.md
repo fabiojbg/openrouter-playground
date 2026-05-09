@@ -24,3 +24,21 @@ yarn dev
 
 This will start a local server on port 3002. You can then navigate to `localhost:3002` to view the project!
 
+## Running with Docker (Recommended for Server Deployment)
+
+If you have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed, you can run the application with a single command:
+
+```bash
+docker compose up --build -d
+```
+
+This will:
+1. Build the production-ready image using a multi-stage Dockerfile.
+2. Start the container in detached mode.
+3. Expose the application on port `3002`.
+
+To stop the application, run:
+```bash
+docker compose down
+```
+
