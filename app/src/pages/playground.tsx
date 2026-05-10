@@ -11,10 +11,10 @@ export default function Playground() {
   return (
     <React.Fragment>
       <Head>
-        <title>OpenRouter Playground</title>
+        <title>Chat-OpenRouter</title>
         <meta name="description" content="A clone of OpenAI playground." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </Head>
       <main className="max-w-screen relative flex max-h-screen w-screen flex-col">
         <PlaygroundProvider>

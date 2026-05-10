@@ -69,10 +69,10 @@ export default function Chat() {
   return (
     <React.Fragment>
       <Head>
-        <title>OpenRouter</title>
+        <title>Chat-OpenRouter</title>
         <meta name="description" content="A clone of OpenAI playground." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </Head>
       <div className="max-w-screen relative flex h-screen max-h-screen w-screen overflow-hidden">
         <div className="hidden md:flex flex-col h-full overflow-hidden" style={{ width: `${sidebarWidth}px`, minWidth: `${sidebarWidth}px` }}>
