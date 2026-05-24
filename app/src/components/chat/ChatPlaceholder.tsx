@@ -17,7 +17,7 @@ export default function ChatPlaceholder({}: Props) {
         <div className="m-4 flex items-center justify-center">
           <AddTokenModal />
         </div>
-        <p className="mt-4 text-lg">
+        <p className="mt-4 text-lg hidden md:block">
           Want more freedom? Check out the{" "}
           <Link
             href="/playground"

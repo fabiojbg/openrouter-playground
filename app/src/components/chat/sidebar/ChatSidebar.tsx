@@ -86,7 +86,7 @@ export default function ChatSidebar({ width }: Props) {
             />
           </div>
           <Link
-            className="flex items-center gap-3 rounded p-3 transition-colors hover:bg-gray-500/10"
+            className="hidden md:flex items-center gap-3 rounded p-3 transition-colors hover:bg-gray-500/10"
             href="/playground"
           >
             <MdBuild />
