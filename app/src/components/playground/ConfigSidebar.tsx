@@ -42,7 +42,7 @@ export default function ConfigSidebar({}: Props) {
                 { label: "Normal", value: "default" },
                 { label: "Flex", value: "flex" },
               ]}
-              value={config.service_tier || "default"}
+              value={config.service_tier || "flex"}
               onChange={(value) => handleUpdateConfig("service_tier", value)}
             />
           </div>

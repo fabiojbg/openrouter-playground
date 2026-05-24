@@ -4,7 +4,6 @@ import { MdAdd, MdDeleteOutline, MdBuild } from "react-icons/md";
 import { useOpenAI } from "@/context/OpenAIProvider";
 // Removed: import { OpenAIChatModels } from "@/utils/OpenAI";
 import Github from "../../misc/Github";
-import ThemeButton from "./buttons/ThemeButton";
 import ButtonContainer from "./buttons/ButtonContainer";
 import Conversations from "./conversation/Conversations";
 import ApiKey from "./buttons/ApiKey";
@@ -97,8 +96,6 @@ export default function ChatSidebar({ width }: Props) {
             <MdDeleteOutline />
             Clear Conversations
           </ButtonContainer>
-
-          <ThemeButton />
         </div>
         <Github /> 
       </div>

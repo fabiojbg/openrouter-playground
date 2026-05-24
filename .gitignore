@@ -40,10 +40,17 @@ next-env.d.ts
 node_modules
 app-deploy/
 .gitnexus/
-.agents/skills/
-.agent/skills/
-.agent/workflows/
-.agents/workflows/
+.agents/skills/openspec*
+.agent/skills/openspec*
+.agents/workflows/opsx*
+.agent/workflows/opsx*
+.agents/skills/create-code-agentes
+.agents/skills/exec-gitnexus
+.agents/skills/gitnexus*
+#.agents/skills/
+#.agent/skills/
+#.agent/workflows/
+#.agents/workflows/
 production_artifacts/
-.agents/agents.md
+#.agents/agents.md
 
