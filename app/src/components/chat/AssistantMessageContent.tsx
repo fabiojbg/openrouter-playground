@@ -22,7 +22,7 @@ import ResponseStats from './ResponseStats'; // Import ResponseStats
 import { OpenAIChatMessage } from '../../utils/OpenAI/OpenAI.types'; // Import OpenAIChatMessage
 import { useState } from 'react'; // Import useState
 import { useOpenAI } from "@/context/OpenAIProvider";
-import { MdRefresh, MdFileDownload } from "react-icons/md";
+import { MdRefresh, MdFileDownload, MdBarChart } from "react-icons/md";
 
 SyntaxHighlighter.registerLanguage("tsx", tsx);
 SyntaxHighlighter.registerLanguage("typescript", typescript);
@@ -218,37 +218,40 @@ export default function AssistantMessageContent({ message, isLast, ...props }: P
         {content}
       </ReactMarkdown>
 
-      <div className="mt-2 flex flex-col items-end gap-2">
-        <div className="flex flex-row items-center gap-2">
+      <div className="mt-4 flex flex-col items-end gap-2 border-t border-white/5 pt-3">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             onClick={handleExport}
-            className="flex flex-row items-center gap-2 px-3 py-1 text-sm bg-stone-500 text-white rounded-md hover:bg-stone-600 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:ring-opacity-50 transition-colors"
-            title="Export as Markdown"
+            className="flex flex-row items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 border border-transparent bg-secondary text-gray-300 hover:bg-gray-600 hover:text-white"
+            title="Download as Markdown"
           >
-            <MdFileDownload className="text-lg" />
-            Download as Markdown
+            <MdFileDownload className="text-sm" />
+            <span className="hidden sm:inline">Download as Markdown</span>
+            <span className="inline sm:hidden">Download</span>
           </button>
           {metadata?.usage && (
             <button
               onClick={() => setShowStats(true)}
-              className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="flex flex-row items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 border border-transparent bg-secondary text-gray-300 hover:bg-gray-600 hover:text-white"
+              title="Show Stats"
             >
+              <MdBarChart className="text-sm" />
               Show Stats
             </button>
           )}
           {isLast && !loading && (
             <button
               onClick={retry}
-              className="flex flex-row items-center gap-2 rounded-md border border-stone-400/20 bg-secondary px-3 py-1 text-sm text-primary transition-colors hover:bg-tertiary"
+              className="flex flex-row items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 border border-transparent bg-secondary text-gray-300 hover:bg-gray-600 hover:text-white"
               title="Retry"
             >
-              <MdRefresh className="text-lg" />
+              <MdRefresh className="text-sm" />
               Retry
             </button>
           )}
         </div>
         {metadata?.usage && (
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-xs text-gray-500 whitespace-nowrap">
             Tokens: {metadata.usage.total_tokens || 'N/A'} | Cost: ${metadata.usage.cost?.toFixed(6) || 'N/A'}
           </div>
         )}
