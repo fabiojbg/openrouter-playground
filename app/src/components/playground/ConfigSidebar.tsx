@@ -4,6 +4,7 @@ import Dropdown from "../input/Dropdown";
 import Slider from "../input/Slider";
 import { OpenAIConfig } from "@/utils/OpenAI";
 import useModels from "../hooks/useModels";
+import SegmentedControl from "../input/SegmentedControl";
 
 type Props = {};
 
@@ -33,6 +34,19 @@ export default function ConfigSidebar({}: Props) {
         onSelect={(option) => handleUpdateConfig("model", option)}
       />
       <div className="text-sm text-gray-600 space-y-1 mt-1">
+        {(config.model?.startsWith("google/") || config.model?.startsWith("openai/") || config.model?.startsWith("~google/") || config.model?.startsWith("~openai/")) && (
+          <div className="mb-4">
+            <SegmentedControl
+              label="Service Tier"
+              options={[
+                { label: "Normal", value: "default" },
+                { label: "Flex", value: "flex" },
+              ]}
+              value={config.service_tier || "default"}
+              onChange={(value) => handleUpdateConfig("service_tier", value)}
+            />
+          </div>
+        )}
         <div>
           Context Length:{" "}
           {models

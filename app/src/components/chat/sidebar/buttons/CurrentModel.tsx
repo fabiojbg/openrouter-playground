@@ -2,6 +2,7 @@ import React from "react";
 import { useOpenAI } from "@/context/OpenAIProvider";
 import Dropdown from "./../../../input/Dropdown";
 import Switch from "./../../../input/Switch";
+import SegmentedControl from "./../../../input/SegmentedControl";
 import useModels from "./../../../hooks/useModels";
 import { OpenAIConfig } from '@/utils/OpenAI';
 
@@ -36,6 +37,17 @@ export default function CurrentModel({}: Props) {
 
       {/* Wrapping div to apply context sensitive padding and margin */}
       <div className="mt-2 pl-1">
+        {(config.model?.startsWith("google/") || config.model?.startsWith("openai/") || config.model?.startsWith("~google/") || config.model?.startsWith("~openai/")) && (
+          <SegmentedControl
+            label="Service Tier"
+            options={[
+              { label: "Normal", value: "default" },
+              { label: "Flex", value: "flex" },
+            ]}
+            value={config.service_tier || "default"}
+            onChange={(value) => handleUpdateConfig("service_tier", value as any)}
+          />
+        )}
         <Switch
           label="Enable Model Web Search"
           checked={!!config.isOnline}

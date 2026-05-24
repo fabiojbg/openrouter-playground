@@ -57,6 +57,7 @@ export interface OpenAISystemMessage {
 
 export interface OpenAIConfig {
   model: string; // Changed from keyof typeof OpenAIChatModels to string
+  service_tier?: "default" | "flex";
   reasoning?: {
     max_tokens?: number;
   };

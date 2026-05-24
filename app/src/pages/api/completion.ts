@@ -33,6 +33,7 @@ export default async function handler(req: Request) {
       tools,
       tool_choice,
       startTime, // Capture startTime from the request body
+      service_tier, // Capture OpenRouter top-level parameter
     } = await req.json().catch(() => ({}));
 
     if (!messages || !Array.isArray(messages)) {
@@ -50,6 +51,7 @@ export default async function handler(req: Request) {
       top_p: top_p ?? defaultConfig.top_p,
       frequency_penalty: frequency_penalty ?? defaultConfig.frequency_penalty,
       presence_penalty: presence_penalty ?? defaultConfig.presence_penalty,
+      ...(service_tier && { service_tier }),
       stream: true,
       n: 1,
     };
@@ -74,7 +76,8 @@ export default async function handler(req: Request) {
         tools,
         tool_choice,
         stream: true,
-        n: 1
+        n: 1,
+        ...(service_tier && { service_tier }),
       }
     : {
         ...config,

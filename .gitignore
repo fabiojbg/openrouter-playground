@@ -38,3 +38,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 node_modules
+app-deploy/
+.gitnexus/
+.agents/skills/
+.agent/skills/
+.agent/workflows/
+.agents/workflows/
+production_artifacts/
+.agents/agents.md
+
