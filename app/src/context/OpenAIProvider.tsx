@@ -372,7 +372,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       let model = config.model;
       let tools: OpenAITool[] | undefined = undefined;
       if (config.isOnline) {
-        tools = [{ type: "openrouter:web_search" }];
+        tools = [{ type: "openrouter:web_search" }, { type: "openrouter:web_fetch" }];
       }
 
       const payload = {
