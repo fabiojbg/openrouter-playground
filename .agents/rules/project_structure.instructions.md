@@ -1,3 +1,9 @@
+---
+trigger: always_on
+description: Project explanation with features, requirements and work instructions
+applyTo: '**'
+---
+
 # Project Overview
 
 The project is a Next.js application built with TypeScript and styled using Tailwind CSS. It aims to provide a user-friendly interface to test OpenRouter API keys, offering both a ChatGPT-like environment and a more detailed Playground.

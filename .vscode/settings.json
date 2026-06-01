@@ -1,0 +1,28 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true
+  },
+  "chat.instructionsFilesLocations": {
+    ".github/instructions": false,
+    ".claude/rules": false,
+    "~/.copilot/instructions": false,
+    "~/.claude/rules": false,
+    ".agents/rules": true
+  },
+  "chat.mcp.serverSampling": {
+    "openrouter-playground/.vscode/mcp.json: gitnexus": {
+      "allowedModels": [
+        "copilot/auto",
+        "copilotcli/claude-haiku-4.5",
+        "customendpoint/LLMGateway/llmgateway/gemini-3-flash",
+        "customendpoint/LLMGateway/llmgateway/gemini-3.1-pro",
+        "customendpoint/LLMGateway/llmgateway/gemini-3.5-flash",
+        "customendpoint/LLMGateway/llmgateway/gpt-5.4-mini",
+        "customendpoint/LLMGateway/llmgateway/minimax-m2.7",
+        "customendpoint/LLMGateway/llmgateway/qwen3.7-max"
+      ]
+    }
+  }
+}
