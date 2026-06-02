@@ -11,6 +11,11 @@ interface OpenRouterModelResponse {
       unit: string; // e.g., "1M tokens"
     };
     context_length: number;
+    top_provider?: {
+      context_length?: number;
+      max_completion_tokens?: number;
+      is_moderated?: boolean;
+    };
   }>;
 }
 
@@ -42,14 +47,21 @@ export default async function handler(
 
     const data: OpenRouterModelResponse = await response.json();
     const openRouterModels: OpenAIModel[] = data.data
-      .map((model) => ({
-        id: model.id,
-        name: model.name,
-        inputFee: model.pricing.prompt,
-        outputFee: model.pricing.completion,
-        context: model.context_length,
-        maxLimit: model.context_length,
-      }))
+      .map((model) => {
+        const maxCompletion = model.top_provider?.max_completion_tokens;
+        const maxLimit = (typeof maxCompletion === "number" && maxCompletion > 0)
+          ? maxCompletion
+          : model.context_length;
+
+        return {
+          id: model.id,
+          name: model.name,
+          inputFee: model.pricing.prompt,
+          outputFee: model.pricing.completion,
+          context: model.context_length,
+          maxLimit: maxLimit,
+        };
+      })
       .sort((a, b) => a.id.localeCompare(b.id));
 
     return res.status(200).json({
