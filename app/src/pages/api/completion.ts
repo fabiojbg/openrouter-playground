@@ -34,6 +34,8 @@ export default async function handler(req: Request) {
       tool_choice,
       startTime, // Capture startTime from the request body
       service_tier, // Capture OpenRouter top-level parameter
+      reasoning, // Capture reasoning config
+      variant, // Capture variant parameter
     } = await req.json().catch(() => ({}));
 
     if (!messages || !Array.isArray(messages)) {
@@ -44,8 +46,13 @@ export default async function handler(req: Request) {
       return new Response("Missing model parameter", { status: 400 });
     }
 
+    let finalModel = model;
+    if (variant === "nitro" || variant === "exacto") {
+      finalModel = `${model}:${variant}`;
+    }
+
     const config = {
-      model,
+      model: finalModel,
       max_tokens: max_tokens ?? defaultConfig.max_tokens,
       temperature: temperature ?? defaultConfig.temperature,
       top_p: top_p ?? defaultConfig.top_p,
@@ -70,7 +77,7 @@ export default async function handler(req: Request) {
   // Omit unsupported parameters for reasoning models
   const payload: OpenAIRequest = isReasoningModel
     ? {
-        model,
+        model: finalModel,
         messages: processedMessages,
         max_completion_tokens: config.max_tokens,
         tools,
@@ -78,12 +85,14 @@ export default async function handler(req: Request) {
         stream: true,
         n: 1,
         ...(service_tier && { service_tier }),
+        ...(reasoning && { reasoning }),
       }
     : {
         ...config,
         messages: processedMessages,
         tools,
         tool_choice,
+        ...(reasoning && { reasoning }),
       };
 
     try {

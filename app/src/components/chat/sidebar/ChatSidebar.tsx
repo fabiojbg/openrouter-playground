@@ -1,6 +1,6 @@
 import Link from "next/link";
-import React, { useState } from "react";
-import { MdAdd, MdDeleteOutline, MdBuild } from "react-icons/md";
+import React, { useState, useEffect } from "react";
+import { MdAdd, MdDeleteOutline, MdBuild, MdSettings, MdExpandMore } from "react-icons/md";
 import { useOpenAI } from "@/context/OpenAIProvider";
 // Removed: import { OpenAIChatModels } from "@/utils/OpenAI";
 import Github from "../../misc/Github";
@@ -17,6 +17,22 @@ type Props = {
 export default function ChatSidebar({ width }: Props) {
   const { clearConversations, config, models, loadingModels, chatWidth, updateChatWidth } = useOpenAI();
   const [searchTerm, setSearchTerm] = useState("");
+  const [isOptionsOpen, setIsOptionsOpen] = useState(true);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("chat-sidebar-options-open");
+    if (saved !== null) {
+      setIsOptionsOpen(saved !== "false");
+    }
+  }, []);
+
+  const toggleOptions = () => {
+    setIsOptionsOpen((prev) => {
+      const newVal = !prev;
+      localStorage.setItem("chat-sidebar-options-open", String(newVal));
+      return newVal;
+    });
+  };
 
   const currentModelDetails = React.useMemo(() => {
     if (!config?.model || models.length === 0) return null;
@@ -54,48 +70,74 @@ export default function ChatSidebar({ width }: Props) {
 
         <Conversations searchTerm={searchTerm} />
 
-        <div className="flex flex-col gap-y-2 border-y border-white/10 py-2 model-panel" >
-          <div className="flex flex-col border-b border-white/10 gap-y-1">
-            <CurrentModel />
-            <div className="text-sm text-gray-300 space-y-1 px-4 pb-2">
-              {loadingModels ? (
-                <div>Loading model details...</div>
-              ) : (
-                <>
-                  <div>Context Length: {currentModelDetails?.context?.toLocaleString('en-US') || 'N/A'}</div>
-                  <div>
-                    Input ($/1M tokens):{" $ "}
-                    {formatPrice(currentModelDetails?.inputFee)}
-                  </div>
-                  <div>
-                    Output ($/1M tokens):{" $"}
-                    {formatPrice(currentModelDetails?.outputFee)}
-                  </div>
-                </>
-              )}
-            </div>
-            <ApiKey />
-          </div>
-          <div className="px-4 py-0 border-b border-white/10">
-            <Slider
-              label="Chat Width"
-              range={[40, 90]}
-              step={1}
-              value={chatWidth}
-              onChange={updateChatWidth}
-            />
-          </div>
-          <Link
-            className="hidden md:flex items-center gap-3 rounded p-3 transition-colors hover:bg-gray-500/10"
-            href="/playground"
+        <div className="flex flex-col border-t border-white/10 mt-auto model-panel">
+          <button
+            onClick={toggleOptions}
+            className="flex w-full items-center justify-between py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-all duration-200 hover:bg-white/5"
+            style={{ outline: "none" }}
           >
-            <MdBuild />
-            Playground
-          </Link>
-          <ButtonContainer onClick={clearConversations}>
-            <MdDeleteOutline />
-            Clear Conversations
-          </ButtonContainer>
+            <span className="flex items-center gap-2">
+              <MdSettings className="text-base" />
+              Sidebar Options
+            </span>
+            <MdExpandMore 
+              className={`text-lg transition-transform duration-300 ${
+                isOptionsOpen ? "" : "rotate-180"
+              }`}
+            />
+          </button>
+
+          <div 
+            className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+              isOptionsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="flex flex-col gap-y-2 border-t border-white/10 py-2">
+                <div className="flex flex-col border-b border-white/10 gap-y-1">
+                  <CurrentModel />
+                  <div className="text-sm text-gray-300 space-y-1 px-4 pb-2">
+                    {loadingModels ? (
+                      <div>Loading model details...</div>
+                    ) : (
+                      <>
+                        <div>Context Length: {currentModelDetails?.context?.toLocaleString('en-US') || 'N/A'}</div>
+                        <div>
+                          Input ($/1M tokens):{" $ "}
+                          {formatPrice(currentModelDetails?.inputFee)}
+                        </div>
+                        <div>
+                          Output ($/1M tokens):{" $"}
+                          {formatPrice(currentModelDetails?.outputFee)}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <ApiKey />
+                </div>
+                <div className="px-4 py-0 border-b border-white/10">
+                  <Slider
+                    label="Chat Width"
+                    range={[40, 90]}
+                    step={1}
+                    value={chatWidth}
+                    onChange={updateChatWidth}
+                  />
+                </div>
+                <Link
+                  className="hidden md:flex items-center gap-3 rounded p-3 transition-colors hover:bg-gray-500/10"
+                  href="/playground"
+                >
+                  <MdBuild />
+                  Playground
+                </Link>
+                <ButtonContainer onClick={clearConversations}>
+                  <MdDeleteOutline />
+                  Clear Conversations
+                </ButtonContainer>
+              </div>
+            </div>
+          </div>
         </div>
         <Github /> 
       </div>

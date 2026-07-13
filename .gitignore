@@ -48,6 +48,7 @@ next-env.d.ts
 node_modules
 app-deploy/
 .gitnexus/
+.claude/
 .agents/skills/openspec*
 .agent/skills/openspec*
 .agents/workflows/opsx*

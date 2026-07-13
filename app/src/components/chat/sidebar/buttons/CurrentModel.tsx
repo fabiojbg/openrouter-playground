@@ -37,6 +37,45 @@ export default function CurrentModel({}: Props) {
 
       {/* Wrapping div to apply context sensitive padding and margin */}
       <div className="mt-2 pl-1">
+        <SegmentedControl
+          label="Variant"
+          options={[
+            { label: "None", value: "none" },
+            { label: "Nitro", value: "nitro" },
+            { label: "Exacto", value: "exacto" },
+          ]}
+          value={config.variant || "none"}
+          onChange={(value) => handleUpdateConfig("variant", value as any)}
+        />
+        {config.variant && config.variant !== "none" && (
+          <div className="text-[11px] text-white/60 italic leading-snug mb-2 pl-1">
+            {config.variant === "nitro" ? (
+              <>
+                Prioritizes speed (throughput).{" "}
+                <a
+                  href="https://openrouter.ai/docs/guides/routing/model-variants/nitro"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-white transition-colors"
+                >
+                  Read docs
+                </a>
+              </>
+            ) : (
+              <>
+                Prioritizes quality/reliability (tool-calling).{" "}
+                <a
+                  href="https://openrouter.ai/docs/guides/routing/model-variants/exacto"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-white transition-colors"
+                >
+                  Read docs
+                </a>
+              </>
+            )}
+          </div>
+        )}
         {(config.model?.startsWith("google/") || config.model?.startsWith("openai/") || config.model?.startsWith("~google/") || config.model?.startsWith("~openai/")) && (
           <SegmentedControl
             label="Service Tier"
@@ -48,6 +87,41 @@ export default function CurrentModel({}: Props) {
             onChange={(value) => handleUpdateConfig("service_tier", value as any)}
           />
         )}
+        <div className="flex flex-col gap-y-1 my-2">
+          <label className="text-sm font-medium opacity-80">Reasoning Effort</label>
+          <div className="flex flex-wrap gap-1 bg-black/20 p-1 rounded-md">
+            {[
+              { label: "Not Set", value: "not-set" },
+              { label: "None", value: "none" },
+              { label: "Low", value: "low" },
+              { label: "Medium", value: "medium" },
+              { label: "High", value: "high" },
+              { label: "xHigh", value: "xhigh" },
+              { label: "Max", value: "max" },
+            ].map((option) => {
+              const isActive = (config.reasoning?.effort || "not-set") === option.value;
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    const effort = option.value === "not-set" ? undefined : (option.value as any);
+                    handleUpdateConfig("reasoning", {
+                      ...(config.reasoning || {}),
+                      effort,
+                    });
+                  }}
+                  className={`px-2 py-1 text-xs font-medium rounded transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white/20 text-white shadow-sm'
+                      : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <Switch
           label="Enable Model Web Search"
           checked={!!config.isOnline}

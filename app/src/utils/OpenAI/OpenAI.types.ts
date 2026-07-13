@@ -60,6 +60,7 @@ export interface OpenAIConfig {
   service_tier?: "default" | "flex";
   reasoning?: {
     max_tokens?: number;
+    effort?: "none" | "low" | "medium" | "high" | "xhigh" | "max";
   };
   temperature?: number;
   max_tokens?: number;
@@ -70,6 +71,7 @@ export interface OpenAIConfig {
   stream?: boolean;
   n?: number;
   isOnline?: boolean;
+  variant?: "none" | "nitro" | "exacto";
 }
 
 export interface OpenAITool {

@@ -375,14 +375,28 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         tools = [{ type: "openrouter:web_search" }, { type: "openrouter:web_fetch" }];
       }
 
+      const { reasoning: _, ...restConfig } = config;
+
+      // Build reasoning configuration if specified
+      let reasoningPayload = undefined;
+      if (config.reasoning) {
+        const { effort, max_tokens } = config.reasoning;
+        if (effort || max_tokens !== undefined) {
+          reasoningPayload = {
+            ...(effort && { effort }),
+            ...(max_tokens !== undefined && { max_tokens }),
+          };
+        }
+      }
+
       const payload = {
-        ...config,
+        ...restConfig,
         model, // Use potentially modified model
         messages: [systemMessage, ...messages_].map(({ role, content }) => ({
           role,
           content,
         })),
-        reasoning: config.reasoning, // Pass reasoning config
+        ...(reasoningPayload && { reasoning: reasoningPayload }),
         tools,
       };
 
