@@ -23,6 +23,7 @@ import { OpenAIChatMessage } from '../../utils/OpenAI/OpenAI.types'; // Import O
 import { useState } from 'react'; // Import useState
 import { useOpenAI } from "@/context/OpenAIProvider";
 import { MdRefresh, MdFileDownload, MdBarChart } from "react-icons/md";
+import MermaidRenderer from "./MermaidRenderer";
 
 SyntaxHighlighter.registerLanguage("tsx", tsx);
 SyntaxHighlighter.registerLanguage("typescript", typescript);
@@ -68,7 +69,7 @@ export default function AssistantMessageContent({ message, isLast, ...props }: P
     }
   }, [reasoning]);
 
-  const MarkdownComponents: any = {
+  const MarkdownComponents: any = React.useMemo(() => ({
     // Work around for not rending <em> and <strong> tags
     em: ({ node, inline, className, children, ...props }: any) => {
       return (
@@ -117,6 +118,64 @@ export default function AssistantMessageContent({ message, isLast, ...props }: P
           return {};
         }
       };
+
+      if (hasLang && hasLang[1] === "mermaid") {
+        const codeContent = Array.isArray(props.children) 
+          ? props.children.join("") 
+          : props.children || "";
+        return (
+          <div className="my-4 rounded-lg overflow-hidden border border-white/10 bg-gray-900/40 relative">
+            <div className="flex items-center justify-between px-4 py-1.5 bg-gray-800/80 border-b border-white/5 text-xs text-gray-400">
+              <span className="font-semibold">Mermaid Diagram</span>
+              <button
+                onClick={() => {
+                  if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(codeContent);
+                  } else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = codeContent;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-9999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                      document.execCommand("copy");
+                    } catch (err) {
+                      console.error("Fallback: Oops, unable to copy", err);
+                    }
+                    document.body.removeChild(textArea);
+                  }
+                  // Show copied message
+                  const copiedMessage = document.createElement("div");
+                  copiedMessage.textContent = "Copied to clipboard";
+                  copiedMessage.style.position = "fixed";
+                  copiedMessage.style.top = "50%";
+                  copiedMessage.style.left = "50%";
+                  copiedMessage.style.transform = "translate(-50%, -50%)";
+                  copiedMessage.style.backgroundColor = "rgba(103, 235, 14, 0.64)";
+                  copiedMessage.style.color = "white";
+                  copiedMessage.style.padding = "1rem 2rem";
+                  copiedMessage.style.borderRadius = "0.5rem";
+                  copiedMessage.style.zIndex = "10000";
+                  copiedMessage.style.fontSize = "1.25rem";
+                  copiedMessage.style.fontWeight = "bold";
+                  document.body.appendChild(copiedMessage);
+                  setTimeout(() => {
+                    document.body.removeChild(copiedMessage);
+                  }, 3000);
+                }}
+                className="rounded bg-gray-700/80 px-2.5 py-1 text-xs text-white hover:bg-gray-600 transition duration-150"
+              >
+                Copy Code
+              </button>
+            </div>
+            <div className="p-4 overflow-auto flex justify-center bg-gray-950/20">
+              <MermaidRenderer code={codeContent} isStreaming={isLast && loading} />
+            </div>
+          </div>
+        );
+      }
 
       return hasLang ? (
         <div className="relative">
@@ -184,7 +243,7 @@ export default function AssistantMessageContent({ message, isLast, ...props }: P
         <code className={className} {...props} />
       );
     },
-  };
+  }), [isLast, loading]);
 
   return (
     <>
